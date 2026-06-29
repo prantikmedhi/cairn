@@ -23,6 +23,9 @@ dependencies = [
 dev = [
   "pytest>=8.0"
 ]
+langchain = [
+  "langchain-core>=0.3"
+]
 
 [project.scripts]
 cairn = "cairn.main:main"

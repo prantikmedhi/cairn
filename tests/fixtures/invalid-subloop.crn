@@ -1,0 +1,11 @@
+cairn: "1.0"
+
+loop:
+  id: invalid-subloop
+  name: Invalid Sub-loop
+  version: 0.1.0
+  states:
+    - id: call_subloop
+      loop: missing-loop
+      inputs:
+        value: ok

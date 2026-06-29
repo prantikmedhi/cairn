@@ -12,6 +12,7 @@ This audit compares current repo state to PRD Phase 1 requirements.
 - Sequential executor in [cairnforge/executor.py](/Users/prantikpratimmedhi/Documents/Cairn/cairnforge/executor.py)
 - Plugin contract in [cairnforge/plugins/base.py](/Users/prantikpratimmedhi/Documents/Cairn/cairnforge/plugins/base.py)
 - First plugin target in [cairnforge/plugins/langchain.py](/Users/prantikpratimmedhi/Documents/Cairn/cairnforge/plugins/langchain.py)
+- Optional native `langchain-core` runnable path with builtin fallback
 - CLI `init`, `validate`, `run` in [cairn/main.py](/Users/prantikpratimmedhi/Documents/Cairn/cairn/main.py)
 - Five example loops in [cairnlang/examples](/Users/prantikpratimmedhi/Documents/Cairn/cairnlang/examples)
 - Automated tests in [tests](/Users/prantikpratimmedhi/Documents/Cairn/tests)
@@ -19,8 +20,8 @@ This audit compares current repo state to PRD Phase 1 requirements.
 
 ## Partially Delivered
 
-- LangChain plugin: target exists and executes Cairn built-in handlers, but not real LangChain graph compilation or external LangChain primitives yet
-- Documentation: README/spec updated, but contributor/developer docs still thin
+- LangChain plugin: executes through real `RunnableLambda` when `langchain-core` is installed, but does not yet compile full framework-native graphs
+- Documentation: solid for MVP, but deeper plugin-author docs still missing
 
 ## Not Delivered
 
@@ -30,6 +31,17 @@ This audit compares current repo state to PRD Phase 1 requirements.
 - Checkpoint/resume
 - Retry engine, circuit breaker, parallel execution
 - Visual editor and observability stack
+
+## Phase 1 Verdict
+
+Phase 1 exit criteria in [roadmap.md](/Users/prantikpratimmedhi/Documents/Cairn/roadmap.md) are met:
+
+- sample loops validate from CLI
+- sample loops execute from CLI
+- runtime errors surface clearly
+- tests cover happy path and key validation failures
+
+Next unlocked work is Phase 2: multi-framework expansion.
 
 ## Verification
 

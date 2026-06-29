@@ -12,6 +12,7 @@ def test_executor_runs_happy_path() -> None:
     assert result.success is True
     assert result.final_outputs == {"greeting": "hello builder"}
     assert [state.state_id for state in result.state_results] == ["prepare", "finish"]
+    assert result.metadata["runtime_mode"] == "builtin-fallback"
 
 
 def test_executor_runs_branching_path() -> None:
@@ -42,3 +43,13 @@ def test_executor_runs_error_hook() -> None:
     assert result.success is False
     assert result.error == "forced failure"
     assert result.final_outputs == {"status": "recovered"}
+
+
+def test_executor_runs_local_subloop() -> None:
+    loop = load_loop_file(Path("cairnlang/examples/composed-hello.crn"))
+
+    result = execute_loop(loop, inputs={"name": "phase-two"})
+
+    assert result.success is True
+    assert result.final_outputs == {"greeting": "hello phase-two"}
+    assert [state.state_id for state in result.state_results] == ["greet"]

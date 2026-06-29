@@ -5,7 +5,7 @@
 
 Cairn is an open runtime and DSL for building intelligent task loops across AI agent frameworks.
 
-This repository now contains a working Phase 1 MVP: a CairnLang schema, parser, semantic validator, executor, built-in `langchain` target plugin, CLI commands, example loops, and automated tests.
+This repository now contains a working Phase 1 MVP: a CairnLang schema, parser, semantic validator, executor, optional native `langchain-core` runnable integration, CLI commands, example loops, and automated tests.
 
 ## Why Cairn
 
@@ -16,8 +16,8 @@ This repository now contains a working Phase 1 MVP: a CairnLang schema, parser, 
 
 ## Project Status
 
-- Status: Phase 1 MVP working
-- Current focus: harden plugin contract and deepen framework integration
+- Status: Phase 1 complete for MVP scope
+- Current focus: begin Phase 2 multi-framework expansion
 - Source of truth: [PRD.md](/Users/prantikpratimmedhi/Documents/Cairn/PRD.md)
 
 ## Core Goals
@@ -50,6 +50,7 @@ This repository now contains a working Phase 1 MVP: a CairnLang schema, parser, 
 
 ```bash
 pip install -e ".[dev]"
+pip install -e ".[langchain]"   # optional native langchain-core runnable path
 python3 -m cairn.main validate cairnlang/examples/hello-world.crn
 python3 -m cairn.main run cairnlang/examples/hello-world.crn --input message=forge
 python3 -m cairn.main init ./demo-loop
@@ -64,6 +65,7 @@ cd cairn
 python3 -m venv .venv
 source .venv/bin/activate
 pip install -e ".[dev]"
+pip install -e ".[langchain]"   # optional
 python3 -m cairn.main validate cairnlang/examples/hello-world.crn
 python3 -m cairn.main run cairnlang/examples/hello-world.crn --input message=forge
 ```
@@ -75,14 +77,15 @@ python3 -m cairn.main run cairnlang/examples/hello-world.crn --input message=for
 - Semantic validation for states, transitions, and budgets
 - Execution engine with transitions and hooks
 - Budget enforcement for iterations, duration, and cost cap structure
-- Built-in proof-of-concept `langchain` plugin target
+- `langchain` plugin target with optional native `langchain-core` runnable execution and builtin fallback
+- Local sub-loop composition with relative file imports
 - Example loops for happy path, branching, data pipeline, failure hook, budget hook
+- Composed example loop using imported sub-loop
 - CLI commands: `init`, `validate`, `run`
 - Automated tests covering parser, validator, executor, and CLI
 
 ## Not Built Yet
 
-- Real LangChain object graph compilation
 - Multi-framework plugins beyond `langchain`
 - Registry, publish/install workflow, tracing UI, visual editor
 - Checkpoint/resume, retry engine, parallel execution, circuit breaker

@@ -19,10 +19,10 @@ Goal: run a valid `.crn` loop through the runtime and one framework plugin.
 
 ### Exit Criteria
 
-- A sample loop can be validated from the CLI.
-- A sample loop can be executed through the MVP runtime.
-- Runtime errors are surfaced with actionable messages.
-- Tests cover happy-path parsing plus core validation failures.
+- [x] A sample loop can be validated from the CLI.
+- [x] A sample loop can be executed through the MVP runtime.
+- [x] Runtime errors are surfaced with actionable messages.
+- [x] Tests cover happy-path parsing plus core validation failures.
 
 ## Phase 2: Multi-Framework
 

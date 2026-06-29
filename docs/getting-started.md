@@ -10,6 +10,10 @@ This repo is prepared for an implementation-first workflow. Use this guide to be
 - A minimal executor
 - A single framework plugin proof-of-concept
 
+## Current Status
+
+Phase 1 is complete for MVP scope. Phase 2 has started with local sub-loop imports/composition. Next highest-value work is multi-framework expansion plus checkpoint/resume.
+
 ## Suggested Order
 
 1. Write `cairnlang/SPEC.md`.

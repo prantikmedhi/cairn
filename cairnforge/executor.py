@@ -43,16 +43,19 @@ def execute_loop(loop: LoopDefinition, inputs: dict[str, Any] | None = None, tar
                 runtime_condition = None
                 if "condition" in current_state.raw:
                     runtime_condition = render_value(current_state.raw["condition"], current_context)
-                outputs = plugin.execute_state(
-                    current_state,
-                    runtime_inputs,
-                    {
-                        "loop": asdict(loop),
-                        "inputs": resolved_inputs,
-                        "states": state_outputs,
-                        "current_condition": runtime_condition,
-                    },
-                )
+                if current_state.loop_ref:
+                    outputs = _execute_subloop(loop, current_state.loop_ref, runtime_inputs, target)
+                else:
+                    outputs = plugin.execute_state(
+                        current_state,
+                        runtime_inputs,
+                        {
+                            "loop": asdict(loop),
+                            "inputs": resolved_inputs,
+                            "states": state_outputs,
+                            "current_condition": runtime_condition,
+                        },
+                    )
             else:
                 outputs = {"skipped": True}
 
@@ -72,6 +75,7 @@ def execute_loop(loop: LoopDefinition, inputs: dict[str, Any] | None = None, tar
                 "target": target,
                 "iterations": tracker.iterations,
                 "cost_usd": tracker.cost_usd,
+                **plugin.get_metadata(),
             },
         )
     except BudgetExceededError as exc:
@@ -82,7 +86,7 @@ def execute_loop(loop: LoopDefinition, inputs: dict[str, Any] | None = None, tar
             final_outputs=hook_outputs,
             state_results=state_results,
             error=str(exc),
-            metadata={"target": target, "iterations": tracker.iterations, "budget_exceeded": True},
+            metadata={"target": target, "iterations": tracker.iterations, "budget_exceeded": True, **plugin.get_metadata()},
         )
     except Exception as exc:
         hook_outputs = _run_hook(loop.on_error, plugin, loop, resolved_inputs, state_outputs, str(exc), tracker)
@@ -92,7 +96,7 @@ def execute_loop(loop: LoopDefinition, inputs: dict[str, Any] | None = None, tar
             final_outputs=hook_outputs,
             state_results=state_results,
             error=str(exc),
-            metadata={"target": target, "iterations": tracker.iterations},
+            metadata={"target": target, "iterations": tracker.iterations, **plugin.get_metadata()},
         )
 
 
@@ -176,3 +180,16 @@ def _run_hook(
         raw={"message": hook.message or error_message},
     )
     return plugin.execute_state(pseudo_state, hook_inputs, {"inputs": inputs, "states": state_outputs, "current_condition": None})
+
+
+def _execute_subloop(loop: LoopDefinition, loop_ref: str, inputs: dict[str, Any], target: str) -> dict[str, Any]:
+    for imported in loop.imports:
+        if imported.name != loop_ref:
+            continue
+        if imported.loop is None:
+            raise RuntimeError(f"Sub-loop '{loop_ref}' is not resolved")
+        result = execute_loop(imported.loop, inputs=inputs, target=target)
+        if not result.success:
+            raise RuntimeError(f"Sub-loop '{loop_ref}' failed: {result.error or 'execution failed'}")
+        return result.final_outputs
+    raise RuntimeError(f"Unknown sub-loop '{loop_ref}'")

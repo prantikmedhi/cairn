@@ -38,10 +38,19 @@ class HookDefinition:
 
 
 @dataclass(slots=True)
+class ImportDefinition:
+    name: str
+    source: str
+    resolved_path: str | None = None
+    loop: "LoopDefinition | None" = None
+
+
+@dataclass(slots=True)
 class StateDefinition:
     id: str
     name: str | None = None
     handler: str | None = None
+    loop_ref: str | None = None
     inputs: JsonMap = field(default_factory=dict)
     condition: str | None = None
     timeout: str | None = None
@@ -59,10 +68,12 @@ class LoopDefinition:
     inputs: dict[str, InputField] = field(default_factory=dict)
     outputs: JsonMap = field(default_factory=dict)
     budget: BudgetDefinition = field(default_factory=BudgetDefinition)
+    imports: list[ImportDefinition] = field(default_factory=list)
     states: list[StateDefinition] = field(default_factory=list)
     transitions: list[TransitionDefinition] = field(default_factory=list)
     on_error: HookDefinition | None = None
     on_budget_exceeded: HookDefinition | None = None
+    source_path: str | None = None
     raw: JsonMap = field(default_factory=dict)
 
 

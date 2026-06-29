@@ -1,0 +1,24 @@
+cairn: "1.0"
+
+loop:
+  id: composed-hello
+  name: Composed Hello
+  version: 0.2.0
+  imports:
+    - name: greeting
+      source: ./shared/greeting-subloop.crn
+  inputs:
+    name:
+      type: string
+      default: builder
+  outputs:
+    greeting:
+      value: ${{ states.greet.outputs.greeting }}
+  budget:
+    max_iterations: 2
+    max_duration: 30s
+  states:
+    - id: greet
+      loop: greeting
+      inputs:
+        name: ${{ inputs.name }}

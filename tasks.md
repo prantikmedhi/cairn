@@ -32,7 +32,7 @@ This backlog is ordered to support fast MVP progress.
 ## Later
 
 - [ ] Checkpoint and resume support
-- [ ] Sub-loop imports
+- [x] Sub-loop imports
 - [ ] Publish and install workflow
 - [ ] Tracing and metrics
 - [ ] Visual editor bootstrap

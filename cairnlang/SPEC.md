@@ -28,6 +28,7 @@ loop:
   name: Example Loop
   version: 0.1.0
   description: Example description
+  imports: []
   inputs: {}
   outputs: {}
   budget: {}
@@ -39,8 +40,9 @@ loop:
 
 - Top level: `cairn`, `loop`
 - Loop: `id`, `name`, `version`, `states`
-- State: `id`, `handler`
+- State: `id` plus exactly one of `handler` or `loop`
 - Transition: `to`
+- Import: `name`, `source`
 
 ## Supported Expressions
 
@@ -62,6 +64,7 @@ loop:
 - First matching transition wins
 - `on_error` hook runs on execution failure
 - `on_budget_exceeded` hook runs on budget exhaustion
+- Local sub-loop imports are supported through `imports` plus state `loop`
 
 ## Built-in Phase 1 Handlers
 
@@ -72,13 +75,29 @@ loop:
 - `core.echo`
 - `core.fail`
 
-## Deliberate Phase 1 Limits
+## Local Sub-loop Shape
+
+```yaml
+loop:
+  imports:
+    - name: greeting
+      source: ./shared/greeting-subloop.crn
+
+  states:
+    - id: greet
+      loop: greeting
+      inputs:
+        name: ${{ inputs.name }}
+```
+
+## Current Limits
 
 - One loop per file
 - YAML only
-- No sub-loops
+- Only local file imports for sub-loops
 - No retries, parallel states, checkpoints, or tracing yet
-- `langchain` target is proof-of-concept plugin surface, not full framework compiler
+- `langchain` target can execute through `langchain-core` runnables when installed, but not full graph compilation yet
+
 ## Implementation Note
 
 Keep initial grammar smaller than PRD. Better strict working subset than fake full surface.
