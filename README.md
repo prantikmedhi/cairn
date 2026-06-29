@@ -5,6 +5,10 @@
 [![PyPI](https://img.shields.io/badge/pypi-v0.1.0-blue)](https://pypi.org/project/cairn/)
 [![Python](https://img.shields.io/badge/python-3.10%2B-blue)](https://www.python.org/)
 
+<div align="center">
+  <img src="docs/assets/cairn_hero.jpg" alt="Cairn Agent Loop Architecture" width="100%">
+</div>
+
 **Cairn** is the open-source Domain-Specific Language (DSL) and runtime purpose-built for **agent loop engineering**. It empowers you to define, validate, and execute portable AI agent task loops across any major framework. 
 
 Think of Cairn as "Terraform for agent loops"—write your orchestration logic once in a portable `.crn` format and seamlessly run it on LangChain, LangGraph, CrewAI, AutoGen, or the OpenAI Agents SDK without rewriting a single line of code.

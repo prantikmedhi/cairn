@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cairn — The Universal Language for Agent Loop Engineering</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="index.css">
+    <style>
+        html {
+            scroll-behavior: smooth;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Primary Nav -->
+    <nav class="primary-nav">
+        <a href="#" class="nav-brand">Cairn</a>
+        <div class="nav-cluster">
+            <a href="#features" class="nav-link">Features</a>
+            <a href="#architecture" class="nav-link">Architecture</a>
+            <a href="#studio" class="nav-link">Studio</a>
+            <a href="#docs" class="nav-link">Docs</a>
+        </div>
+        <div class="nav-cluster">
+            <a href="https://github.com/prantikmedhi/cairn" class="button-secondary" target="_blank" rel="noopener noreferrer">GitHub</a>
+            <a href="#install" class="button-primary">Get Started</a>
+        </div>
+    </nav>
+
+    <!-- Hero Stripe Band -->
+    <section class="hero-stripe-band">
+        <div class="container hero-content">
+            <h1 class="display-xl">The Universal Language for Agent Loop Engineering</h1>
+            <p class="body-lg">Think of Cairn as "Terraform for agent loops"—write your orchestration logic once in a portable .crn format and seamlessly run it on LangChain, LangGraph, CrewAI, AutoGen, or the OpenAI Agents SDK without rewriting a single line of code.</p>
+            <a href="#install" class="button-primary" style="margin-bottom: 64px;">Download v0.1.0</a>
+            
+            <!-- Command Palette Mockup (CLI) -->
+            <div class="command-palette-card">
+                <div class="command-palette-header">
+                    <svg width="52" height="12" viewBox="0 0 52 12" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <circle cx="6" cy="6" r="6" fill="#ED6A5E"/>
+                        <circle cx="26" cy="6" r="6" fill="#F4BF4F"/>
+                        <circle cx="46" cy="6" r="6" fill="#61C554"/>
+                    </svg>
+                    <input type="text" class="command-palette-search" value="python3 -m cairn.main " readonly>
+                </div>
+                <div class="command-palette-body">
+                    <div class="command-palette-row command-palette-row-active">
+                        <div class="app-icon-tile green">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                        </div>
+                        <span>validate cairnlang/examples/hello-world.crn</span>
+                        <div class="palette-meta">
+                            Validate Loop
+                            <span class="keycap">↵</span>
+                        </div>
+                    </div>
+                    <div class="command-palette-row">
+                        <div class="app-icon-tile blue">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+                        </div>
+                        <span>run cairnlang/examples/hello-world.crn --input message=forge</span>
+                        <div class="palette-meta">
+                            Run Loop
+                        </div>
+                    </div>
+                    <div class="command-palette-row">
+                        <div class="app-icon-tile yellow">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                        </div>
+                        <span>trace export --format json</span>
+                        <div class="palette-meta">
+                            Export Traces
+                        </div>
+                    </div>
+                    <div class="command-palette-row">
+                        <div class="app-icon-tile yellow">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>
+                        </div>
+                        <span>cost analyze cairnlang/examples/hello-world.crn</span>
+                        <div class="palette-meta">
+                            Budget Guards
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Core Concepts / Features Section -->
+    <section class="section" id="features">
+        <div class="container">
+            <h2 class="display-lg" style="margin-bottom: 48px;">Core Concepts & Features</h2>
+            <div class="feature-grid">
+                
+                <div class="feature-card-dark">
+                    <div class="app-icon-tile yellow" style="width: 48px; height: 48px;">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z"></path></svg>
+                    </div>
+                    <h3 class="heading-md">Multi-Framework Execution</h3>
+                    <p class="body-sm text-mute">Execute your `.crn` loops natively on your preferred backend: `langchain`, `langgraph`, `crewai`, `autogen`, or `openai`.</p>
+                    <a href="https://github.com/prantikmedhi/cairn/blob/main/docs/plugin-development.md" class="button-secondary" style="margin-top: auto; align-self: flex-start;" target="_blank" rel="noopener noreferrer">View Adapters →</a>
+                </div>
+                
+                <div class="feature-card-dark" style="background-color: var(--surface-elevated);">
+                    <div class="app-icon-tile blue" style="width: 48px; height: 48px;">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="3" y1="9" x2="21" y2="9"></line><line x1="9" y1="21" x2="9" y2="9"></line></svg>
+                    </div>
+                    <h3 class="heading-md">Sub-loop Composition</h3>
+                    <p class="body-sm text-mute">Break complex agents down into reusable modules by importing and composing loops from local files.</p>
+                </div>
+                
+                <div class="feature-card-dark">
+                    <div class="app-icon-tile green" style="width: 48px; height: 48px;">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="5" rx="9" ry="3"></ellipse><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"></path><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"></path></svg>
+                    </div>
+                    <h3 class="heading-md">Checkpoint / Resume</h3>
+                    <p class="body-sm text-mute">Native support for saving and restoring long-running loop execution states. Pause execution and pick up right where you left off.</p>
+                    <a href="https://github.com/prantikmedhi/cairn/blob/main/docs/getting-started.md" class="button-secondary" style="margin-top: auto; align-self: flex-start;" target="_blank" rel="noopener noreferrer">Read Docs →</a>
+                </div>
+
+                <div class="feature-card-dark" style="background-color: var(--surface-elevated);">
+                    <div class="app-icon-tile yellow" style="width: 48px; height: 48px;">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+                    </div>
+                    <h3 class="heading-md">Budget Guards & Circuit Breakers</h3>
+                    <p class="body-sm text-mute">Prevent runaway loops with hard caps on iterations, duration, and token cost. Prevent systemic failures with robust retry guards.</p>
+                </div>
+                
+                <div class="feature-card-dark">
+                    <div class="app-icon-tile blue" style="width: 48px; height: 48px;">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="6" y1="3" x2="6" y2="15"></line><circle cx="18" cy="6" r="3"></circle><circle cx="6" cy="18" r="3"></circle><path d="M18 9a9 9 0 0 1-9 9"></path></svg>
+                    </div>
+                    <h3 class="heading-md">Parallel Fan-Out</h3>
+                    <p class="body-sm text-mute">Fork/join execution patterns for concurrent agent tasks. Execute independent tasks concurrently and join the results.</p>
+                </div>
+                
+                <div class="feature-card-dark" style="background-color: var(--surface-elevated);" id="studio">
+                    <div class="app-icon-tile green" style="width: 48px; height: 48px;">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"></path></svg>
+                    </div>
+                    <h3 class="heading-md">CairnStudio</h3>
+                    <p class="body-sm text-mute">Visual loop editor in active beta—bringing drag-and-drop loop engineering to your browser without needing to write raw YAML.</p>
+                    <a href="https://github.com/prantikmedhi/cairn/tree/main/cairnstudio" class="button-secondary" style="margin-top: auto; align-self: flex-start;" target="_blank" rel="noopener noreferrer">Try Beta →</a>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <!-- Architecture Section -->
+    <section class="section" id="architecture">
+        <div class="container">
+            <h2 class="display-lg" style="margin-bottom: 48px;">Modular Architecture</h2>
+            <div class="feature-card-dark" style="background-color: var(--canvas); padding: var(--spacing-xxl);">
+                <div class="feature-grid" style="grid-template-columns: repeat(3, 1fr);">
+                    <div>
+                        <h4 class="body-sm-strong" style="color: var(--on-dark); margin-bottom: 8px;">CairnLang</h4>
+                        <p class="body-sm text-mute">The open `.crn` DSL, Parser, Schema, and Examples.</p>
+                    </div>
+                    <div>
+                        <h4 class="body-sm-strong" style="color: var(--on-dark); margin-bottom: 8px;">CairnForge</h4>
+                        <p class="body-sm text-mute">The Runtime Engine: Validator, Executor, Budgets, Checkpoints.</p>
+                    </div>
+                    <div>
+                        <h4 class="body-sm-strong" style="color: var(--on-dark); margin-bottom: 8px;">Plugins</h4>
+                        <p class="body-sm text-mute">LangChain, LangGraph, CrewAI, AutoGen, and OpenAI adapters.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Install Section -->
+    <section class="section" id="install">
+        <div class="container" style="text-align: center; max-width: 600px;">
+            <h2 class="display-lg" style="margin-bottom: 24px;">Ready to build?</h2>
+            <p class="body-lg" style="color: var(--charcoal); margin-bottom: 32px;">Install Cairn via pip and validate your first loop in seconds.</p>
+            <div style="background-color: var(--surface-elevated); padding: 16px 24px; border-radius: var(--rounded-md); border: 1px solid var(--hairline); display: inline-flex; align-items: center; gap: 16px;">
+                <code style="font-family: monospace; color: var(--on-dark); font-size: 16px; font-weight: 500;">pip install cairn</code>
+                <div style="cursor: pointer; color: var(--mute); display: flex;" title="Copy to clipboard">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer-section" id="docs">
+        <div class="container">
+            <div class="footer-grid">
+                <div class="footer-col">
+                    <h4 class="body-sm-strong">Ecosystem</h4>
+                    <ul>
+                        <li><a href="https://github.com/prantikmedhi/cairn/tree/main/cairnlang" class="body-sm" target="_blank" rel="noopener noreferrer">CairnLang</a></li>
+                        <li><a href="https://github.com/prantikmedhi/cairn/tree/main/cairnforge" class="body-sm" target="_blank" rel="noopener noreferrer">CairnForge</a></li>
+                        <li><a href="https://github.com/prantikmedhi/cairn/tree/main/cairnhub" class="body-sm" target="_blank" rel="noopener noreferrer">CairnHub</a></li>
+                        <li><a href="https://github.com/prantikmedhi/cairn/tree/main/cairnstudio" class="body-sm" target="_blank" rel="noopener noreferrer">CairnStudio</a></li>
+                    </ul>
+                </div>
+                <div class="footer-col">
+                    <h4 class="body-sm-strong">Documentation</h4>
+                    <ul>
+                        <li><a href="https://github.com/prantikmedhi/cairn/blob/main/docs/getting-started.md" class="body-sm" target="_blank" rel="noopener noreferrer">Getting Started</a></li>
+                        <li><a href="https://github.com/prantikmedhi/cairn/blob/main/docs/cli-reference.md" class="body-sm" target="_blank" rel="noopener noreferrer">CLI Reference</a></li>
+                        <li><a href="https://github.com/prantikmedhi/cairn/blob/main/docs/plugin-development.md" class="body-sm" target="_blank" rel="noopener noreferrer">Plugin Development</a></li>
+                        <li><a href="https://github.com/prantikmedhi/cairn/blob/main/docs/observability.md" class="body-sm" target="_blank" rel="noopener noreferrer">Observability</a></li>
+                        <li><a href="https://github.com/prantikmedhi/cairn/blob/main/docs/self-hosting.md" class="body-sm" target="_blank" rel="noopener noreferrer">Self-Hosting</a></li>
+                        <li><a href="https://github.com/prantikmedhi/cairn/blob/main/cairnlang/SPEC.md" class="body-sm" target="_blank" rel="noopener noreferrer">Language Spec</a></li>
+                    </ul>
+                </div>
+                <div class="footer-col">
+                    <h4 class="body-sm-strong">Community</h4>
+                    <ul>
+                        <li><a href="https://github.com/prantikmedhi/cairn" class="body-sm" target="_blank" rel="noopener noreferrer">GitHub</a></li>
+                        <li><a href="https://github.com/prantikmedhi/cairn/blob/main/CONTRIBUTING.md" class="body-sm" target="_blank" rel="noopener noreferrer">Contributing</a></li>
+                        <li><a href="https://github.com/prantikmedhi/cairn/blob/main/CODE_OF_CONDUCT.md" class="body-sm" target="_blank" rel="noopener noreferrer">Code of Conduct</a></li>
+                        <li><a href="https://github.com/prantikmedhi/cairn/blob/main/CHANGELOG.md" class="body-sm" target="_blank" rel="noopener noreferrer">Changelog</a></li>
+                    </ul>
+                </div>
+                <div class="footer-col" style="grid-column: span 3; text-align: right;">
+                    <p class="body-sm text-mute" style="margin-bottom: 8px;">Cairn — The Universal Language for Agent Loop Engineering</p>
+                    <p class="body-sm text-mute">Licensed under Apache 2.0</p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+</body>
+</html>
