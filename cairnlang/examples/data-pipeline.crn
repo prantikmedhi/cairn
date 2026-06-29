@@ -1,0 +1,39 @@
+cairn: "1.0"
+
+loop:
+  id: data-pipeline
+  name: Data Pipeline
+  version: 0.1.0
+  description: Sequential data transformation loop
+  inputs:
+    source:
+      type: string
+      default: orders.csv
+  outputs:
+    source:
+      value: ${{ states.fetch.outputs.source }}
+    normalized:
+      value: ${{ states.normalize.outputs.normalized }}
+    destination:
+      value: ${{ states.publish.outputs.destination }}
+  budget:
+    max_iterations: 4
+    max_duration: 30s
+  states:
+    - id: fetch
+      handler: core.collect
+      inputs:
+        source: ${{ inputs.source }}
+    - id: normalize
+      handler: core.template
+      inputs:
+        normalized: "normalized:${{ states.fetch.outputs.source }}"
+    - id: publish
+      handler: core.template
+      inputs:
+        destination: "warehouse://${{ states.normalize.outputs.normalized }}"
+  transitions:
+    - from: fetch
+      to: normalize
+    - from: normalize
+      to: publish

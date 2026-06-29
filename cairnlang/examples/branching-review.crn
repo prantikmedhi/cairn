@@ -1,0 +1,56 @@
+cairn: "1.0"
+
+loop:
+  id: branching-review
+  name: Branching Review
+  version: 0.1.0
+  description: Review branch loop with conditional transitions
+  inputs:
+    approved:
+      type: boolean
+      default: false
+    score:
+      type: number
+      default: 0.72
+  outputs:
+    status:
+      value: ${{ states.finish.outputs.status }}
+    score:
+      value: ${{ states.analyze.outputs.score }}
+  budget:
+    max_iterations: 5
+    max_duration: 30s
+  states:
+    - id: analyze
+      handler: core.collect
+      inputs:
+        score: ${{ inputs.score }}
+        approved: ${{ inputs.approved }}
+    - id: route
+      handler: core.condition
+      condition: ${{ states.analyze.outputs.approved }}
+    - id: approved
+      handler: core.collect
+      inputs:
+        status: approved
+    - id: rejected
+      handler: core.collect
+      inputs:
+        status: rejected
+    - id: finish
+      handler: core.collect
+      inputs:
+        status: ${{ outputs.status }}
+  transitions:
+    - from: analyze
+      to: route
+    - from: route
+      to: approved
+      condition: outputs.passed
+    - from: route
+      to: rejected
+      condition: not outputs.passed
+    - from: approved
+      to: finish
+    - from: rejected
+      to: finish

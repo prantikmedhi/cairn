@@ -1,0 +1,22 @@
+cairn: "1.0"
+
+loop:
+  id: failure-hook
+  name: Failure Hook
+  version: 0.1.0
+  description: Demonstrates error hook execution
+  outputs:
+    status:
+      value: ${{ states.recover.outputs.status }}
+  budget:
+    max_iterations: 3
+    max_duration: 30s
+  states:
+    - id: explode
+      handler: core.fail
+      inputs:
+        message: forced failure
+  on_error:
+    handler: core.collect
+    inputs:
+      status: recovered

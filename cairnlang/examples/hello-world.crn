@@ -1,0 +1,29 @@
+cairn: "1.0"
+
+loop:
+  id: hello-world
+  name: Hello World
+  version: 0.1.0
+  description: Minimal greeting loop
+  inputs:
+    message:
+      type: string
+      default: world
+  outputs:
+    greeting:
+      value: ${{ states.finish.outputs.greeting }}
+  budget:
+    max_iterations: 3
+    max_duration: 30s
+  states:
+    - id: prepare
+      handler: core.template
+      inputs:
+        greeting: "hello ${{ inputs.message }}"
+    - id: finish
+      handler: core.collect
+      inputs:
+        greeting: ${{ states.prepare.outputs.greeting }}
+  transitions:
+    - from: prepare
+      to: finish

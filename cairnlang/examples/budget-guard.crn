@@ -1,0 +1,37 @@
+cairn: "1.0"
+
+loop:
+  id: budget-guard
+  name: Budget Guard
+  version: 0.1.0
+  description: Demonstrates budget exceeded hook
+  outputs:
+    status:
+      value: ${{ states.budget_hook.outputs.status }}
+  budget:
+    max_iterations: 2
+    max_duration: 30s
+  states:
+    - id: step_one
+      handler: core.collect
+      inputs:
+        status: started
+    - id: step_two
+      handler: core.collect
+      inputs:
+        status: mid
+    - id: loop_back
+      handler: core.collect
+      inputs:
+        status: looping
+  transitions:
+    - from: step_one
+      to: step_two
+    - from: step_two
+      to: loop_back
+    - from: loop_back
+      to: step_two
+  on_budget_exceeded:
+    handler: core.collect
+    inputs:
+      status: budget_exceeded

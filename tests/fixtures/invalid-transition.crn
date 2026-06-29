@@ -1,0 +1,14 @@
+cairn: "1.0"
+
+loop:
+  id: invalid-transition
+  name: Invalid Transition
+  version: 0.1.0
+  states:
+    - id: first
+      handler: core.collect
+      inputs:
+        value: ok
+  transitions:
+    - from: first
+      to: missing
