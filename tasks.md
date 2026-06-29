@@ -40,7 +40,8 @@ This backlog is ordered to support fast MVP progress.
 - [x] Parallel execution
 - [x] Additional framework adapter targets
 - [x] CLI debug / cost / test / watch foundations
-- [ ] Visual editor bootstrap
+- [x] Visual editor bootstrap
+- [ ] Collaborative editing
 - [ ] Remote registry backend and search
 - [ ] Hosted ratings and verified publishers
 - [ ] Rich observability UI

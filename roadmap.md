@@ -78,6 +78,16 @@ Goal: support loop authoring beyond handwritten YAML.
 - Import/export `.crn`
 - Live simulation and trace replay
 
+### Current Status
+
+- [x] CairnStudio beta local server
+- [x] Drag-and-drop canvas
+- [x] Real-time validation
+- [x] Live execution preview
+- [x] Trace replay visualization
+- [x] Import/export `.crn`
+- [ ] Collaborative editing
+
 ## Current Recommendation
 
 Keep the first implementation narrow:

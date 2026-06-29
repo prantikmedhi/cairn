@@ -16,8 +16,8 @@ This repository now contains working local foundations through Phases 1-3: Cairn
 
 ## Project Status
 
-- Status: Phases 1-3 code foundations complete for local repo scope
-- Current focus: Phase 4 visual editor for non-developers
+- Status: Phases 1-3 code foundations complete for local repo scope, Phase 4 beta started
+- Current focus: CairnStudio beta and Phase 2-3 pending hosted/community gaps
 - Source of truth: [PRD.md](/Users/prantikpratimmedhi/Documents/Cairn/PRD.md)
 
 ## Core Goals
@@ -65,6 +65,7 @@ python3 -m cairn.main search hello --registry .cairnhub
 python3 -m cairn.main debug cairnlang/examples/retry-recovery.crn
 python3 -m cairn.main cost cairnlang/examples/parallel-fanout.crn
 python3 -m cairn.main test
+python3 -m cairn.main studio --port 8787
 PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 python3 -m pytest -q
 ```
 
@@ -99,14 +100,15 @@ python3 -m cairn.main run cairnlang/examples/hello-world.crn --input message=for
 - Example loops for happy path, branching, data pipeline, failure hook, budget hook
 - Composed example loop using imported sub-loop
 - Retry and parallel example loops
-- CLI commands: `init`, `validate`, `run`, `inspect`, `trace`, `publish`, `install`, `list`, `search`, `registry-inspect`, `debug`, `cost`, `test`, `watch`
+- CairnStudio beta: drag/drop canvas, YAML import/export, live validation, preview, trace replay
+- CLI commands: `init`, `validate`, `run`, `inspect`, `trace`, `publish`, `install`, `list`, `search`, `registry-inspect`, `debug`, `cost`, `test`, `watch`, `studio`
 - Automated tests covering parser, validator, executor, and CLI
 - Optional Jinja templating path for template strings when `jinja2` is installed
 
 ## Not Built Yet
 
 - Hosted registry backend, remote discovery, auth, ratings, and version APIs
-- Visual editor app
+- Collaborative editing in CairnStudio
 - Rich observability stack and hosted CairnLens UI
 - Community and hosted milestones from PRD that depend on external adoption
 
@@ -123,6 +125,7 @@ Read [CONTRIBUTING.md](/Users/prantikpratimmedhi/Documents/Cairn/CONTRIBUTING.md
 - Observability notes: [docs/observability.md](/Users/prantikpratimmedhi/Documents/Cairn/docs/observability.md)
 - Plugin SDK notes: [docs/plugin-development.md](/Users/prantikpratimmedhi/Documents/Cairn/docs/plugin-development.md)
 - Self-hosting notes: [docs/self-hosting.md](/Users/prantikpratimmedhi/Documents/Cairn/docs/self-hosting.md)
+- CairnStudio beta notes: [cairnstudio/README.md](/Users/prantikpratimmedhi/Documents/Cairn/cairnstudio/README.md)
 
 ## Recommended First Build Slice
 

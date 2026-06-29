@@ -1,0 +1,612 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{{ page_title }}</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+      :root {
+        --bg: #fafafa;
+        --panel: rgba(255,255,255,0.88);
+        --ink: #09090b;
+        --muted: #52525b;
+        --line: #d4d4d8;
+        --accent: #ec4899;
+        --accent-soft: rgba(236,72,153,0.12);
+        --shadow: 0 18px 40px rgba(24,24,27,0.08);
+      }
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        font-family: "DM Sans", sans-serif;
+        color: var(--ink);
+        background:
+          radial-gradient(circle at top left, rgba(236,72,153,0.14), transparent 28%),
+          radial-gradient(circle at top right, rgba(24,24,27,0.08), transparent 26%),
+          linear-gradient(180deg, #ffffff 0%, #fafafa 48%, #f4f4f5 100%);
+      }
+      .skip-link {
+        position: absolute;
+        left: 12px;
+        top: -48px;
+        background: #fff;
+        color: #000;
+        padding: 10px 14px;
+        border-radius: 12px;
+        z-index: 1000;
+      }
+      .skip-link:focus { top: 12px; outline: 3px solid var(--accent); }
+      .shell {
+        display: grid;
+        grid-template-columns: 280px minmax(480px, 1fr) 360px;
+        gap: 18px;
+        min-height: 100vh;
+        padding: 18px;
+      }
+      .panel {
+        background: var(--panel);
+        backdrop-filter: blur(14px);
+        border: 1px solid rgba(255,255,255,0.85);
+        box-shadow: var(--shadow);
+        border-radius: 24px;
+      }
+      .rail, .inspector, .workspace { padding: 20px; }
+      .eyebrow {
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        padding: 8px 12px;
+        border-radius: 999px;
+        background: var(--accent-soft);
+        color: var(--accent);
+        font-size: 13px;
+        font-weight: 700;
+      }
+      h1, h2, h3 {
+        font-family: "Space Grotesk", sans-serif;
+        margin: 0;
+        letter-spacing: -0.04em;
+      }
+      h1 { font-size: clamp(28px, 3vw, 42px); margin-top: 18px; }
+      p { color: var(--muted); line-height: 1.55; }
+      .palette {
+        display: grid;
+        gap: 12px;
+        margin-top: 22px;
+      }
+      .palette-card {
+        cursor: pointer;
+        border: 1px solid var(--line);
+        background: #fff;
+        padding: 14px;
+        border-radius: 18px;
+        transition: border-color 180ms ease, transform 180ms ease, box-shadow 180ms ease;
+      }
+      .palette-card:hover, .palette-card:focus-visible {
+        border-color: var(--accent);
+        box-shadow: 0 12px 24px rgba(236,72,153,0.12);
+        transform: translateY(-2px);
+        outline: none;
+      }
+      .workspace {
+        display: grid;
+        grid-template-rows: auto 1fr auto;
+        gap: 16px;
+      }
+      .workspace-top {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: space-between;
+        gap: 12px;
+        align-items: center;
+      }
+      .button-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+      }
+      button, .file-button {
+        cursor: pointer;
+        border: none;
+        border-radius: 14px;
+        padding: 12px 16px;
+        font: inherit;
+        font-weight: 700;
+        transition: transform 180ms ease, opacity 180ms ease, box-shadow 180ms ease;
+      }
+      button:hover, button:focus-visible, .file-button:hover, .file-button:focus-visible {
+        transform: translateY(-1px);
+        outline: 3px solid rgba(236,72,153,0.24);
+      }
+      .primary { background: var(--ink); color: #fff; }
+      .accent { background: var(--accent); color: #fff; }
+      .ghost { background: #fff; color: var(--ink); border: 1px solid var(--line); }
+      .canvas-shell {
+        display: grid;
+        grid-template-columns: 1fr 340px;
+        gap: 16px;
+        min-height: 540px;
+      }
+      .canvas {
+        position: relative;
+        overflow: hidden;
+        border-radius: 22px;
+        border: 1px solid var(--line);
+        background:
+          linear-gradient(90deg, rgba(63,63,70,0.06) 1px, transparent 1px) 0 0/36px 36px,
+          linear-gradient(rgba(63,63,70,0.06) 1px, transparent 1px) 0 0/36px 36px,
+          linear-gradient(180deg, #fff 0%, #fdf2f8 100%);
+      }
+      .canvas.empty::before {
+        content: "Drag blocks here to build loop";
+        position: absolute;
+        inset: 0;
+        display: grid;
+        place-items: center;
+        color: var(--muted);
+        font-weight: 700;
+        letter-spacing: 0.02em;
+      }
+      .node {
+        position: absolute;
+        width: 210px;
+        border-radius: 18px;
+        background: rgba(255,255,255,0.96);
+        border: 1px solid rgba(24,24,27,0.08);
+        box-shadow: 0 18px 28px rgba(24,24,27,0.08);
+        padding: 14px;
+        cursor: move;
+      }
+      .node.active { border-color: var(--accent); box-shadow: 0 18px 30px rgba(236,72,153,0.18); }
+      .node header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 8px;
+      }
+      .node-title { font-family: "Space Grotesk", sans-serif; font-size: 16px; font-weight: 700; }
+      .chip {
+        display: inline-flex;
+        align-items: center;
+        padding: 6px 10px;
+        border-radius: 999px;
+        background: rgba(24,24,27,0.06);
+        color: var(--muted);
+        font-size: 12px;
+        font-weight: 700;
+      }
+      .mini-list {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+        margin-top: 8px;
+      }
+      .yaml-pane, .trace-pane {
+        border: 1px solid var(--line);
+        border-radius: 20px;
+        background: #fff;
+        padding: 14px;
+      }
+      textarea, input, select {
+        width: 100%;
+        font: inherit;
+        padding: 12px 14px;
+        border-radius: 14px;
+        border: 1px solid var(--line);
+        background: #fff;
+        color: var(--ink);
+      }
+      textarea:focus, input:focus, select:focus {
+        outline: 3px solid rgba(236,72,153,0.24);
+        border-color: var(--accent);
+      }
+      textarea { min-height: 220px; resize: vertical; }
+      .stack { display: grid; gap: 12px; }
+      .label { font-size: 13px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; }
+      .trace-step {
+        padding: 12px 14px;
+        border-radius: 14px;
+        background: #fff;
+        border: 1px solid rgba(24,24,27,0.08);
+      }
+      .trace-step.active {
+        border-color: var(--accent);
+        background: rgba(236,72,153,0.08);
+      }
+      .status {
+        padding: 12px 14px;
+        border-radius: 16px;
+        background: rgba(24,24,27,0.04);
+        color: var(--muted);
+      }
+      .status.error {
+        background: rgba(239,68,68,0.08);
+        color: #991b1b;
+      }
+      .status.ok {
+        background: rgba(34,197,94,0.08);
+        color: #166534;
+      }
+      .footer-note {
+        color: var(--muted);
+        font-size: 13px;
+      }
+      @media (max-width: 1280px) {
+        .shell { grid-template-columns: 1fr; }
+        .canvas-shell { grid-template-columns: 1fr; }
+      }
+      @media (prefers-reduced-motion: reduce) {
+        *, *::before, *::after { transition: none !important; animation: none !important; }
+      }
+    </style>
+  </head>
+  <body>
+    <a class="skip-link" href="#studio">Skip to editor</a>
+    <main class="shell" id="studio">
+      <aside class="panel rail" aria-label="Palette and project info">
+        <span class="eyebrow">{{ phase_badge }}</span>
+        <h1>{{ page_title }}</h1>
+        <p>Build agent loops visually, validate in real time, preview traces, and export `.crn` without touching raw YAML unless you want to.</p>
+        <div class="status">{{ collaboration_status }}</div>
+        <div class="palette" role="list" aria-label="State palette">
+          <button class="palette-card ghost" draggable="true" data-kind="state" data-handler="core.collect">Collect state</button>
+          <button class="palette-card ghost" draggable="true" data-kind="state" data-handler="core.template">Template state</button>
+          <button class="palette-card ghost" draggable="true" data-kind="state" data-handler="core.condition">Condition state</button>
+          <button class="palette-card ghost" draggable="true" data-kind="subloop" data-handler="">Sub-loop state</button>
+        </div>
+      </aside>
+
+      <section class="panel workspace">
+        <div class="workspace-top">
+          <div>
+            <h2>Canvas + Source</h2>
+            <p>Canvas stays source-of-truth for non-dev flow. YAML stays visible and exportable for dev handoff.</p>
+          </div>
+          <div class="button-row">
+            <button class="ghost" id="syncFromYaml">Import YAML to canvas</button>
+            <button class="ghost" id="downloadYaml">Export .crn</button>
+            <label class="file-button ghost" for="uploadYaml">Import .crn</label>
+            <input hidden id="uploadYaml" type="file" accept=".crn,.cairn,.yaml,.yml">
+          </div>
+        </div>
+
+        <div class="canvas-shell">
+          <div class="canvas empty" id="canvas" aria-label="Loop canvas"></div>
+          <div class="stack">
+            <div class="yaml-pane stack">
+              <div class="label">YAML</div>
+              <textarea id="yamlEditor" aria-label="Loop YAML">{{ starter_yaml }}</textarea>
+              <div class="button-row">
+                <button class="primary" id="validateYaml">Validate</button>
+                <button class="accent" id="previewLoop">Preview run</button>
+              </div>
+              <div id="validationStatus" class="status">Waiting for validation.</div>
+            </div>
+            <div class="trace-pane stack">
+              <div class="label">Trace Replay</div>
+              <div class="button-row">
+                <select id="targetSelect" aria-label="Execution target">
+                  {% for target in available_targets %}
+                  <option value="{{ target }}">{{ target }}</option>
+                  {% endfor %}
+                </select>
+                <input id="inputJson" aria-label="Preview inputs JSON" value='{"prompt":"hello"}'>
+              </div>
+              <div id="traceList" class="stack"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="footer-note">
+          Visual beta covers drag/drop, live validation, live preview, trace replay, import/export.
+          Collaborative editing remains pending.
+        </div>
+      </section>
+
+      <aside class="panel inspector" aria-label="Node inspector">
+        <h2>Inspector</h2>
+        <p>Select node to edit labels, handler, loop reference, inputs, transitions, guards, and parallel branches.</p>
+        <div class="stack" id="inspectorFields">
+          <div class="status">No node selected yet.</div>
+        </div>
+      </aside>
+    </main>
+
+    <script>
+      const canvas = document.getElementById("canvas");
+      const yamlEditor = document.getElementById("yamlEditor");
+      const validationStatus = document.getElementById("validationStatus");
+      const traceList = document.getElementById("traceList");
+      const inspectorFields = document.getElementById("inspectorFields");
+      const targetSelect = document.getElementById("targetSelect");
+      const inputJson = document.getElementById("inputJson");
+
+      const loopModel = {
+        loop: {
+          id: "visual-starter",
+          name: "Visual Starter",
+          version: "0.1.0",
+          description: "Visual starter loop",
+          imports: [],
+          budget: { max_iterations: 3, max_duration: "30s" },
+          states: []
+        }
+      };
+
+      let selectedNodeId = null;
+      let replayTimer = null;
+
+      async function postJson(url, payload) {
+        const response = await fetch(url, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload)
+        });
+        const data = await response.json();
+        if (!response.ok) throw new Error(data.error || "Request failed");
+        return data;
+      }
+
+      function setStatus(text, kind = "") {
+        validationStatus.textContent = text;
+        validationStatus.className = kind ? `status ${kind}` : "status";
+      }
+
+      function randomId(prefix) {
+        return `${prefix}-${Math.random().toString(36).slice(2, 8)}`;
+      }
+
+      function addNode(kind, handler, x, y) {
+        const node = {
+          id: randomId(kind === "subloop" ? "subloop" : "state"),
+          label: kind === "subloop" ? "Sub-loop" : handler.replace("core.", "").replace(".", " "),
+          kind,
+          handler: kind === "subloop" ? "" : handler,
+          loop: kind === "subloop" ? "import-name" : "",
+          condition: "",
+          parallel: [],
+          guard: {},
+          inputs: kind === "subloop" ? { name: "world" } : { value: "sample" },
+          transitions: [],
+          x,
+          y
+        };
+        loopModel.loop.states.push(node);
+        selectedNodeId = node.id;
+        syncYamlFromModel();
+        renderCanvas();
+        renderInspector();
+      }
+
+      function renderCanvas() {
+        canvas.innerHTML = "";
+        canvas.classList.toggle("empty", loopModel.loop.states.length === 0);
+        for (const node of loopModel.loop.states) {
+          const element = document.createElement("article");
+          element.className = `node${node.id === selectedNodeId ? " active" : ""}`;
+          element.style.left = `${node.x}px`;
+          element.style.top = `${node.y}px`;
+          element.draggable = true;
+          element.innerHTML = `
+            <header>
+              <div class="node-title">${node.label}</div>
+              <span class="chip">${node.kind === "subloop" ? "sub-loop" : (node.handler || "handler")}</span>
+            </header>
+            <div class="footer-note">${node.condition || "No condition"}</div>
+            <div class="mini-list">
+              ${node.transitions.map((target) => `<span class="chip">${target}</span>`).join("") || '<span class="chip">no transitions</span>'}
+            </div>
+          `;
+          element.addEventListener("click", () => {
+            selectedNodeId = node.id;
+            renderCanvas();
+            renderInspector();
+          });
+          element.addEventListener("dragstart", (event) => {
+            event.dataTransfer.setData("application/json", JSON.stringify({ type: "move-node", id: node.id }));
+          });
+          canvas.appendChild(element);
+        }
+      }
+
+      function renderInspector() {
+        const node = loopModel.loop.states.find((item) => item.id === selectedNodeId);
+        if (!node) {
+          inspectorFields.innerHTML = '<div class="status">No node selected yet.</div>';
+          return;
+        }
+
+        inspectorFields.innerHTML = `
+          <label class="label" for="nodeLabel">Label</label>
+          <input id="nodeLabel" value="${escapeHtml(node.label)}">
+          <label class="label" for="nodeHandler">Handler</label>
+          <input id="nodeHandler" value="${escapeHtml(node.handler || "")}" ${node.kind === "subloop" ? "disabled" : ""}>
+          <label class="label" for="nodeLoop">Loop Ref</label>
+          <input id="nodeLoop" value="${escapeHtml(node.loop || "")}" ${node.kind === "subloop" ? "" : "disabled"}>
+          <label class="label" for="nodeCondition">Condition</label>
+          <input id="nodeCondition" value="${escapeHtml(node.condition || "")}">
+          <label class="label" for="nodeTransitions">Transitions (comma separated)</label>
+          <input id="nodeTransitions" value="${escapeHtml((node.transitions || []).join(", "))}">
+          <label class="label" for="nodeParallel">Parallel Branches (comma separated)</label>
+          <input id="nodeParallel" value="${escapeHtml((node.parallel || []).join(", "))}">
+          <label class="label" for="nodeRetry">Retry Count</label>
+          <input id="nodeRetry" value="${escapeHtml(String(node.guard?.retry ?? ""))}">
+          <label class="label" for="nodeInputs">Inputs JSON</label>
+          <textarea id="nodeInputs">${escapeHtml(JSON.stringify(node.inputs, null, 2))}</textarea>
+        `;
+
+        const bind = (id, updater) => {
+          const field = document.getElementById(id);
+          field.addEventListener("input", () => {
+            updater(field.value);
+            syncYamlFromModel();
+            renderCanvas();
+          });
+        };
+
+        bind("nodeLabel", (value) => { node.label = value || node.id; });
+        bind("nodeHandler", (value) => { node.handler = value; });
+        bind("nodeLoop", (value) => { node.loop = value; });
+        bind("nodeCondition", (value) => { node.condition = value; });
+        bind("nodeTransitions", (value) => { node.transitions = splitList(value); });
+        bind("nodeParallel", (value) => { node.parallel = splitList(value); });
+        bind("nodeRetry", (value) => {
+          if (value === "") {
+            node.guard = {};
+          } else {
+            node.guard = { retry: Number(value) || 0, backoff: "exponential" };
+          }
+        });
+        bind("nodeInputs", (value) => {
+          try { node.inputs = JSON.parse(value || "{}"); } catch (error) {}
+        });
+      }
+
+      function splitList(value) {
+        return value.split(",").map((item) => item.trim()).filter(Boolean);
+      }
+
+      async function syncModelFromYaml() {
+        try {
+          const data = await postJson("/api/model/from-yaml", { yaml: yamlEditor.value });
+          Object.assign(loopModel, data);
+          selectedNodeId = loopModel.loop.states[0]?.id || null;
+          renderCanvas();
+          renderInspector();
+          setStatus("Canvas synced from YAML.", "ok");
+        } catch (error) {
+          setStatus(error.message, "error");
+        }
+      }
+
+      async function syncYamlFromModel() {
+        try {
+          const data = await postJson("/api/model/to-yaml", loopModel);
+          yamlEditor.value = data.yaml;
+          validateCurrentYaml();
+        } catch (error) {
+          setStatus(error.message, "error");
+        }
+      }
+
+      async function validateCurrentYaml() {
+        try {
+          const data = await postJson("/api/validate", { yaml: yamlEditor.value });
+          setStatus(`Valid loop: ${data.loop_id}. States: ${data.states.join(", ")}`, "ok");
+        } catch (error) {
+          setStatus(error.message, "error");
+        }
+      }
+
+      async function previewLoop() {
+        let inputs = {};
+        try {
+          inputs = JSON.parse(inputJson.value || "{}");
+        } catch (error) {
+          setStatus("Preview inputs must be valid JSON.", "error");
+          return;
+        }
+        try {
+          const data = await postJson("/api/preview", {
+            yaml: yamlEditor.value,
+            inputs,
+            target: targetSelect.value
+          });
+          renderTrace(data.state_results || []);
+          setStatus(data.success ? "Preview run completed." : (data.error || "Preview failed"), data.success ? "ok" : "error");
+        } catch (error) {
+          setStatus(error.message, "error");
+        }
+      }
+
+      function renderTrace(states) {
+        traceList.innerHTML = states.map((state, index) => `
+          <div class="trace-step" data-trace-index="${index}">
+            <strong>${state.state_id}</strong>
+            <div class="footer-note">${state.skipped ? "skipped" : "executed"}</div>
+          </div>
+        `).join("");
+        const steps = [...traceList.querySelectorAll(".trace-step")];
+        if (replayTimer) window.clearInterval(replayTimer);
+        let index = 0;
+        replayTimer = window.setInterval(() => {
+          steps.forEach((step) => step.classList.remove("active"));
+          if (steps[index]) steps[index].classList.add("active");
+          index = (index + 1) % Math.max(steps.length, 1);
+        }, 650);
+      }
+
+      function downloadYaml() {
+        const blob = new Blob([yamlEditor.value], { type: "text/yaml" });
+        const url = URL.createObjectURL(blob);
+        const anchor = document.createElement("a");
+        anchor.href = url;
+        anchor.download = `${loopModel.loop.id || "cairn-loop"}.crn`;
+        anchor.click();
+        URL.revokeObjectURL(url);
+      }
+
+      function escapeHtml(value) {
+        return String(value)
+          .replaceAll("&", "&amp;")
+          .replaceAll("<", "&lt;")
+          .replaceAll(">", "&gt;")
+          .replaceAll('"', "&quot;");
+      }
+
+      document.querySelectorAll(".palette-card").forEach((button) => {
+        button.addEventListener("dragstart", (event) => {
+          event.dataTransfer.setData("application/json", JSON.stringify({
+            type: "create-node",
+            kind: button.dataset.kind,
+            handler: button.dataset.handler
+          }));
+        });
+        button.addEventListener("click", () => addNode(button.dataset.kind, button.dataset.handler, 80, 120));
+      });
+
+      canvas.addEventListener("dragover", (event) => event.preventDefault());
+      canvas.addEventListener("drop", (event) => {
+        event.preventDefault();
+        const payload = JSON.parse(event.dataTransfer.getData("application/json"));
+        const rect = canvas.getBoundingClientRect();
+        const x = event.clientX - rect.left - 100;
+        const y = event.clientY - rect.top - 40;
+        if (payload.type === "create-node") {
+          addNode(payload.kind, payload.handler, x, y);
+          return;
+        }
+        if (payload.type === "move-node") {
+          const node = loopModel.loop.states.find((item) => item.id === payload.id);
+          if (!node) return;
+          node.x = x;
+          node.y = y;
+          renderCanvas();
+        }
+      });
+
+      document.getElementById("validateYaml").addEventListener("click", validateCurrentYaml);
+      document.getElementById("previewLoop").addEventListener("click", previewLoop);
+      document.getElementById("syncFromYaml").addEventListener("click", syncModelFromYaml);
+      document.getElementById("downloadYaml").addEventListener("click", downloadYaml);
+      document.getElementById("uploadYaml").addEventListener("change", async (event) => {
+        const file = event.target.files?.[0];
+        if (!file) return;
+        yamlEditor.value = await file.text();
+        syncModelFromYaml();
+      });
+
+      let validateTimer = null;
+      yamlEditor.addEventListener("input", () => {
+        if (validateTimer) window.clearTimeout(validateTimer);
+        validateTimer = window.setTimeout(validateCurrentYaml, 300);
+      });
+
+      syncModelFromYaml();
+    </script>
+  </body>
+</html>

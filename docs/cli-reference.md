@@ -16,6 +16,7 @@ Current Cairn CLI commands:
 - `cost`
 - `test`
 - `watch`
+- `studio`
 
 ## Examples
 
@@ -28,4 +29,5 @@ python3 -m cairn.main search hello --registry .cairnhub
 python3 -m cairn.main debug cairnlang/examples/retry-recovery.crn
 python3 -m cairn.main cost cairnlang/examples/parallel-fanout.crn
 python3 -m cairn.main watch cairnlang/examples/hello-world.crn --cycles 2
+python3 -m cairn.main studio --port 8787
 ```

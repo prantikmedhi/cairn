@@ -9,6 +9,7 @@ import typer
 from rich.console import Console
 
 from cairnhub.local_registry import inspect_loop, install_loop, list_loops, publish_loop, search_loops
+from cairnstudio.app import run_server as run_studio_server
 from cairnforge.compiler import compile_loop
 from cairnforge.executor import execute_loop, execute_loop_with_runtime_controls
 from cairnforge.plugins import get_builtin_plugins
@@ -330,6 +331,16 @@ def watch(
             remaining -= 1
         if remaining > 0:
             time.sleep(interval)
+
+
+@app.command()
+def studio(
+    host: str = typer.Option("127.0.0.1", "--host", help="Studio bind host"),
+    port: int = typer.Option(8787, "--port", help="Studio bind port"),
+) -> None:
+    """Launch CairnStudio beta visual editor."""
+
+    run_studio_server(host=host, port=port)
 
 
 if __name__ == "__main__":
