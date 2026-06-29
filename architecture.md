@@ -1,6 +1,6 @@
-# MVP Architecture
+# Cairn Architecture — Agent Loop Engineering Platform Design
 
-This document captures the technical shape of the first Cairn implementation.
+This document captures the technical architecture of the Cairn agent loop engineering platform.
 
 ## Principles
 

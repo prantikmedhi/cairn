@@ -1,6 +1,6 @@
-# Changelog
+# Changelog — Cairn Agent Loop Engineering Platform
 
-All notable changes to this project will be documented in this file.
+All notable changes to the Cairn agent loop engineering platform will be documented in this file.
 
 Format follows Keep a Changelog style and project versions follow SemVer.
 

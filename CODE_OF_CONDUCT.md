@@ -1,8 +1,8 @@
-# Code of Conduct
+# Code of Conduct — Cairn Agent Loop Engineering Community
 
 ## Our Pledge
 
-We want Cairn community to be open, useful, and respectful for everyone.
+We want the Cairn agent loop engineering community to be open, useful, and respectful for everyone.
 Contributors, maintainers, and participants should act in ways that make
 technical collaboration possible without harassment or exclusion.
 

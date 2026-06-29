@@ -1,6 +1,6 @@
-# Plugin Development
+# Plugin Development — Build Custom Agent Loop Framework Adapters
 
-This document defines current Cairn plugin SDK surface for Phases 2-3.
+This document defines the Cairn plugin SDK surface for extending agent loop engineering to custom frameworks.
 
 ## Plugin Contract
 

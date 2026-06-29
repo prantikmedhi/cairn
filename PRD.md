@@ -1,4 +1,4 @@
-# Cairn — Open Runtime for Building Intelligent Task-loops
+# Cairn — Universal DSL & Runtime for Agent Loop Engineering
 
 ## Product Requirements Document
 

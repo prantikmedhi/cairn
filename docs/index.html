@@ -1,0 +1,289 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Cairn — Universal DSL & Runtime for Agent Loop Engineering</title>
+  <meta name="description" content="Cairn is the open-source DSL and runtime for agent loop engineering. Define portable AI agent loops once in .crn format, run across LangChain, LangGraph, CrewAI, AutoGen, and OpenAI.">
+  <meta name="keywords" content="loop engineering, agent loop, AI agent loop, agent orchestration, LangChain, LangGraph, CrewAI, AutoGen, agent DSL, portable agent loops, AI workflow, task loops, cairn, agent framework">
+  <meta name="robots" content="index, follow">
+  <link rel="canonical" href="https://prantikmedhi.github.io/cairn/">
+
+  <!-- Open Graph -->
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Cairn — Universal DSL & Runtime for Agent Loop Engineering">
+  <meta property="og:description" content="Define portable AI agent loops once. Run across any framework. Open-source DSL and runtime for agent loop engineering.">
+  <meta property="og:url" content="https://prantikmedhi.github.io/cairn/">
+  <meta property="og:site_name" content="Cairn">
+  <meta property="og:locale" content="en_US">
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Cairn — Universal DSL & Runtime for Agent Loop Engineering">
+  <meta name="twitter:description" content="Define portable AI agent loops once. Run across any framework. Open-source DSL and runtime for agent loop engineering.">
+
+  <!-- JSON-LD Structured Data -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    "name": "Cairn",
+    "applicationCategory": "DeveloperApplication",
+    "operatingSystem": "macOS, Linux, Windows",
+    "description": "Universal DSL and runtime for agent loop engineering. Define portable AI agent loops once, run across LangChain, LangGraph, CrewAI, AutoGen, and OpenAI.",
+    "url": "https://github.com/prantikmedhi/cairn",
+    "sameAs": "https://github.com/prantikmedhi/cairn",
+    "version": "0.1.0",
+    "license": "https://www.apache.org/licenses/LICENSE-2.0",
+    "programmingLanguage": "Python",
+    "softwareVersion": "0.1.0",
+    "author": {
+      "@type": "Organization",
+      "name": "Cairn Contributors"
+    },
+    "offers": {
+      "@type": "Offer",
+      "price": "0",
+      "priceCurrency": "USD"
+    }
+  }
+  </script>
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    "name": "Cairn",
+    "url": "https://prantikmedhi.github.io/cairn/",
+    "description": "Universal DSL and runtime for agent loop engineering",
+    "potentialAction": {
+      "@type": "SearchAction",
+      "target": "https://github.com/prantikmedhi/cairn/search?q={search_term_string}",
+      "query-input": "required name=search_term_string"
+    }
+  }
+  </script>
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      {"@type": "ListItem", "position": 1, "name": "Home", "item": "https://prantikmedhi.github.io/cairn/"},
+      {"@type": "ListItem", "position": 2, "name": "Documentation", "item": "https://github.com/prantikmedhi/cairn/blob/main/docs/getting-started.md"},
+      {"@type": "ListItem", "position": 3, "name": "GitHub", "item": "https://github.com/prantikmedhi/cairn"}
+    ]
+  }
+  </script>
+
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background: #fafafa;
+      color: #09090b;
+      line-height: 1.6;
+    }
+    .container { max-width: 960px; margin: 0 auto; padding: 2rem 1.5rem; }
+    header { text-align: center; padding: 4rem 0 3rem; }
+    h1 { font-size: 2.8rem; font-weight: 800; letter-spacing: -0.03em; }
+    h1 span { color: #ec4899; }
+    .subtitle { font-size: 1.2rem; color: #52525b; max-width: 640px; margin: 1rem auto; }
+    .badges { margin: 1.5rem 0; display: flex; justify-content: center; gap: 0.5rem; flex-wrap: wrap; }
+    .badges img { height: 24px; }
+    .btn {
+      display: inline-block;
+      padding: 0.8rem 2rem;
+      border-radius: 999px;
+      font-weight: 700;
+      text-decoration: none;
+      transition: transform 0.15s ease;
+    }
+    .btn:hover { transform: translateY(-2px); }
+    .btn-primary { background: #09090b; color: #fff; }
+    .btn-secondary { background: #ec4899; color: #fff; }
+    .btn-outline { background: transparent; border: 2px solid #d4d4d8; color: #09090b; }
+    .ctas { display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; margin-top: 2rem; }
+    section { padding: 3rem 0; }
+    section h2 { font-size: 1.8rem; font-weight: 700; margin-bottom: 1.5rem; letter-spacing: -0.02em; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem; }
+    .card {
+      background: #fff;
+      border: 1px solid #e4e4e7;
+      border-radius: 16px;
+      padding: 1.5rem;
+      transition: box-shadow 0.2s ease;
+    }
+    .card:hover { box-shadow: 0 8px 24px rgba(0,0,0,0.06); }
+    .card h3 { font-size: 1.1rem; margin-bottom: 0.5rem; }
+    .card p { color: #52525b; font-size: 0.95rem; }
+    .card .icon { font-size: 2rem; margin-bottom: 0.5rem; }
+    .code-block {
+      background: #18181b;
+      color: #e4e4e7;
+      border-radius: 12px;
+      padding: 1.2rem;
+      font-family: "SF Mono", Monaco, "Cascadia Code", monospace;
+      font-size: 0.85rem;
+      overflow-x: auto;
+      margin: 1rem 0;
+    }
+    .code-block .comment { color: #71717a; }
+    .code-block .keyword { color: #a78bfa; }
+    .code-block .string { color: #34d399; }
+    footer {
+      text-align: center;
+      padding: 3rem 0;
+      color: #71717a;
+      font-size: 0.9rem;
+      border-top: 1px solid #e4e4e7;
+    }
+    footer a { color: #ec4899; text-decoration: none; }
+    .framework-list { display: flex; flex-wrap: wrap; gap: 0.75rem; justify-content: center; padding: 1rem 0; }
+    .framework-badge {
+      background: #fff;
+      border: 1px solid #e4e4e7;
+      border-radius: 999px;
+      padding: 0.5rem 1.2rem;
+      font-weight: 600;
+      font-size: 0.9rem;
+    }
+    @media (max-width: 600px) {
+      h1 { font-size: 2rem; }
+      .container { padding: 1rem; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>Cairn <span>⟳</span></h1>
+      <p class="subtitle">The universal DSL and runtime for <strong>agent loop engineering</strong>. Define portable AI agent loops once, run across any framework.</p>
+      <div class="badges">
+        <img src="https://img.shields.io/badge/license-Apache%202.0-blue" alt="Apache 2.0">
+        <img src="https://img.shields.io/badge/python-3.10%2B-blue" alt="Python 3.10+">
+        <img src="https://img.shields.io/github/stars/prantikmedhi/cairn" alt="GitHub stars">
+      </div>
+      <div class="framework-list">
+        <span class="framework-badge">LangChain</span>
+        <span class="framework-badge">LangGraph</span>
+        <span class="framework-badge">CrewAI</span>
+        <span class="framework-badge">AutoGen</span>
+        <span class="framework-badge">OpenAI</span>
+      </div>
+      <div class="ctas">
+        <a class="btn btn-primary" href="https://github.com/prantikmedhi/cairn">GitHub</a>
+        <a class="btn btn-secondary" href="https://github.com/prantikmedhi/cairn/blob/main/docs/getting-started.md">Get Started</a>
+        <a class="btn btn-outline" href="https://github.com/prantikmedhi/cairn/blob/main/PRD.md">Read PRD</a>
+      </div>
+    </header>
+
+    <section>
+      <h2>What Is Agent Loop Engineering?</h2>
+      <p>Agent loop engineering is the discipline of designing, validating, and orchestrating AI agent task loops — the sequential and parallel steps that define how an AI agent processes information, makes decisions, and takes actions. Every AI agent framework (LangChain, LangGraph, CrewAI, AutoGen, OpenAI Agents SDK) implements loops differently, creating vendor lock-in.</p>
+      <p><strong>Cairn</strong> solves this with a vendor-agnostic DSL (<code>.crn</code> format) that lets you define your agent loop once and run it on any framework. It's the <em>write once, run anywhere</em> for AI agent loops.</p>
+    </section>
+
+    <section>
+      <h2>Why Cairn?</h2>
+      <div class="grid">
+        <div class="card">
+          <div class="icon">🔄</div>
+          <h3>Portable Agent Loops</h3>
+          <p>Define your loop engineering logic once in <code>.crn</code> format. Run it on LangChain, LangGraph, CrewAI, AutoGen, or OpenAI without rewriting.</p>
+        </div>
+        <div class="card">
+          <div class="icon">✅</div>
+          <h3>Validate Before Execution</h3>
+          <p>JSON Schema + semantic validation catches loop engineering mistakes before they cost runtime. Prevent infinite loops, missing transitions, and budget violations.</p>
+        </div>
+        <div class="card">
+          <div class="icon">🔧</div>
+          <h3>17 CLI Commands</h3>
+          <p>Full toolkit: <code>validate</code>, <code>run</code>, <code>trace</code>, <code>debug</code>, <code>cost</code>, <code>publish</code>, <code>install</code>, <code>search</code>, <code>studio</code>, and more.</p>
+        </div>
+        <div class="card">
+          <div class="icon">🛡️</div>
+          <h3>Budget Guards</h3>
+          <p>Max iterations, duration caps, and cost limits prevent runaway loops. Circuit breaker and retry with exponential backoff for resilient loop engineering.</p>
+        </div>
+        <div class="card">
+          <div class="icon">⚡</div>
+          <h3>Parallel Execution</h3>
+          <p>Fork/join patterns for concurrent agent execution. Fan out across multiple LLM calls and aggregate results.</p>
+        </div>
+        <div class="card">
+          <div class="icon">🎨</div>
+          <h3>Visual Loop Editor</h3>
+          <p>CairnStudio beta provides drag-and-drop loop engineering. Build agent loops visually, export to <code>.crn</code>, and validate in real time.</p>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <h2>Loop Engineering in Action</h2>
+      <p>A minimal agent loop in Cairn DSL:</p>
+      <div class="code-block">
+        <span class="comment"># hello-world.crn — a minimal agent loop</span><br>
+        loop:<br>
+        &nbsp;&nbsp;id: hello-world<br>
+        &nbsp;&nbsp;name: Hello World Loop<br>
+        &nbsp;&nbsp;version: "0.1.0"<br>
+        &nbsp;&nbsp;budget:<br>
+        &nbsp;&nbsp;&nbsp;&nbsp;max_iterations: 3<br>
+        &nbsp;&nbsp;&nbsp;&nbsp;max_duration: "30s"<br>
+        &nbsp;&nbsp;states:<br>
+        &nbsp;&nbsp;&nbsp;&nbsp;- id: greet<br>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;handler: core.template<br>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;inputs:<br>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;prompt: "Hello, {{ message }}!"<br>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;transitions:<br>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- done<br>
+        &nbsp;&nbsp;&nbsp;&nbsp;- id: done<br>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;handler: core.collect
+      </div>
+    </section>
+
+    <section>
+      <h2>Supported Frameworks</h2>
+      <p>Cairn's plugin architecture lets you target any agent framework. Built-in adapters:</p>
+      <div class="grid">
+        <div class="card"><h3>LangChain</h3><p>Native <code>langchain-core</code> runnable execution path with optional integration.</p></div>
+        <div class="card"><h3>LangGraph</h3><p>State graph adapter for LangGraph's agent loop model.</p></div>
+        <div class="card"><h3>CrewAI</h3><p>Sequential task adapter for CrewAI's crew-based loops.</p></div>
+        <div class="card"><h3>AutoGen</h3><p>Conversation loop adapter for AutoGen's multi-agent conversations.</p></div>
+        <div class="card"><h3>OpenAI</h3><p>Agents SDK adapter for OpenAI's agent loop patterns.</p></div>
+        <div class="card"><h3>Custom</h3><p>Extend via the plugin system. Build your own adapter for any framework.</p></div>
+      </div>
+    </section>
+
+    <section>
+      <h2>Quick Start</h2>
+      <div class="code-block">
+        git clone https://github.com/prantikmedhi/cairn.git<br>
+        cd cairn<br>
+        python3 -m venv .venv<br>
+        source .venv/bin/activate<br>
+        pip install -e ".[dev]"<br>
+        python3 -m cairn.main validate cairnlang/examples/hello-world.crn<br>
+        python3 -m cairn.main run cairnlang/examples/hello-world.crn --input message=forge
+      </div>
+    </section>
+
+    <section>
+      <h2>Documentation</h2>
+      <div class="grid">
+        <div class="card"><a href="https://github.com/prantikmedhi/cairn/blob/main/docs/getting-started.md"><h3>Getting Started</h3></a><p>Your first agent loop with Cairn.</p></div>
+        <div class="card"><a href="https://github.com/prantikmedhi/cairn/blob/main/docs/cli-reference.md"><h3>CLI Reference</h3></a><p>All 17 commands documented.</p></div>
+        <div class="card"><a href="https://github.com/prantikmedhi/cairn/blob/main/docs/plugin-development.md"><h3>Plugin SDK</h3></a><p>Build custom framework adapters.</p></div>
+        <div class="card"><a href="https://github.com/prantikmedhi/cairn/blob/main/cairnlang/SPEC.md"><h3>Language Spec</h3></a><p>Complete CairnLang specification.</p></div>
+        <div class="card"><a href="https://github.com/prantikmedhi/cairn/blob/main/cairnlang/examples"><h3>Examples</h3></a><p>Hello world, branching, pipeline, parallel, retry loops.</p></div>
+        <div class="card"><a href="https://github.com/prantikmedhi/cairn/blob/main/PRD.md"><h3>Product Requirements</h3></a><p>Full PRD and roadmap.</p></div>
+      </div>
+    </section>
+
+    <footer>
+      <p><a href="https://github.com/prantikmedhi/cairn">Cairn on GitHub</a> — Apache 2.0 Licensed</p>
+      <p>Built for the agent loop engineering community.</p>
+    </footer>
+  </div>
+</body>
+</html>

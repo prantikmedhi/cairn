@@ -1,6 +1,6 @@
-# Build Tasks
+# Build Tasks — Cairn Agent Loop Engineering Platform
 
-This backlog is ordered to support fast MVP progress.
+This backlog is ordered to support fast MVP progress for the Cairn agent loop engineering platform.
 
 ## Now
 

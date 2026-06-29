@@ -1,6 +1,6 @@
-# Cairn Roadmap
+# Cairn Roadmap — Agent Loop Engineering Platform
 
-This roadmap translates the PRD into an execution sequence that is practical for implementation.
+This roadmap translates the PRD into an execution sequence for building the universal agent loop engineering platform.
 
 ## Phase 1: Foundation
 

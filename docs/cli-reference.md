@@ -1,6 +1,6 @@
-# CLI Reference
+# Cairn CLI Reference — Agent Loop Engineering Commands
 
-Current Cairn CLI commands:
+Complete reference for all 17 Cairn CLI commands used in agent loop engineering: validating, running, debugging, tracing, publishing, and inspecting agent loops.
 
 - `init`
 - `validate`

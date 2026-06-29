@@ -1,6 +1,6 @@
-# Observability
+# Observability for Agent Loop Engineering — Tracing, Metrics, and Monitoring
 
-Current Phase 3 observability scope:
+Current Phase 3 observability scope for Cairn agent loop engineering:
 
 - JSON trace export from `run --trace-file`
 - duration metadata per execution

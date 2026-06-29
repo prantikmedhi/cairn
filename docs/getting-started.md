@@ -1,6 +1,6 @@
-# Getting Started
+# Getting Started with Cairn — Agent Loop Engineering Guide
 
-This repo is prepared for an implementation-first workflow. Use this guide to begin Phase 1 without reopening product-scoping questions every session.
+Start here to build your first portable AI agent loop with Cairn. This guide covers the loop engineering workflow: defining, validating, and running agent loops that work across LangChain, LangGraph, CrewAI, AutoGen, and OpenAI.
 
 ## What To Build First
 

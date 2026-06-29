@@ -1,4 +1,4 @@
-# Contributing
+# Contributing to Cairn — Agent Loop Engineering Platform
 
 ## Local Setup
 
