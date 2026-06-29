@@ -9,6 +9,7 @@ Current scope:
 - install loops from local registry path
 - list, search, inspect, and fetch published manifests/source
 - verified publisher registry and API-key gated publishing
+- per-version loop ratings and review summaries
 - FastAPI app for self-hosted CairnHub foundation
 
 Run hosted API:
@@ -38,6 +39,5 @@ Set path with `CAIRN_HUB_PUBLISHERS_PATH=/path/to/publishers.json`.
 
 Still not built:
 
-- ratings
 - shared multi-node search/index
 - version resolution across remote registry peers

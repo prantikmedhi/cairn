@@ -8,6 +8,7 @@ from typing import Any
 
 import yaml
 
+from cairnhub.ratings import LoopRatingsStore
 from cairnforge.parser import load_loop_file, parse_loop_document
 from cairnforge.validator import validate_loop_definition
 
@@ -15,6 +16,7 @@ from cairnforge.validator import validate_loop_definition
 class FileRegistryStore:
     def __init__(self, registry_path: str | Path) -> None:
         self.registry_root = Path(registry_path)
+        self.ratings = LoopRatingsStore(self.registry_root)
 
     def publish_path(self, loop_path: str | Path, metadata: dict[str, Any] | None = None) -> dict[str, Any]:
         source = Path(loop_path)
@@ -61,7 +63,7 @@ class FileRegistryStore:
         if not self.registry_root.exists():
             return []
         manifests = sorted(self.registry_root.glob("*/*/manifest.json"))
-        return [json.loads(path.read_text(encoding="utf-8")) for path in manifests]
+        return [self._with_ratings(json.loads(path.read_text(encoding="utf-8"))) for path in manifests]
 
     def search_loops(self, query: str) -> list[dict[str, Any]]:
         query_text = query.strip().lower()
@@ -97,7 +99,7 @@ class FileRegistryStore:
         manifest_path = loop_dir / version / "manifest.json"
         if not manifest_path.exists():
             raise FileNotFoundError(f"Loop '{loop_id}@{version}' not found in registry {self.registry_root}")
-        return json.loads(manifest_path.read_text(encoding="utf-8"))
+        return self._with_ratings(json.loads(manifest_path.read_text(encoding="utf-8")))
 
     def install_loop(self, ref: str, destination: str | Path, force: bool = False) -> Path:
         manifest = self.inspect_loop(ref)
@@ -113,6 +115,27 @@ class FileRegistryStore:
     def load_source_text(self, ref: str) -> str:
         manifest = self.inspect_loop(ref)
         return Path(manifest["stored_loop_path"]).read_text(encoding="utf-8")
+
+    def submit_rating(
+        self,
+        ref: str,
+        *,
+        score: int,
+        reviewer: str,
+        comment: str | None = None,
+    ) -> dict[str, Any]:
+        manifest = self.inspect_loop(ref)
+        return self.ratings.submit_rating(
+            loop_id=manifest["id"],
+            version=manifest["version"],
+            score=score,
+            reviewer=reviewer,
+            comment=comment,
+        )
+
+    def get_ratings(self, ref: str) -> dict[str, Any]:
+        manifest = self.inspect_loop(ref)
+        return self.ratings.summarize(loop_id=manifest["id"], version=manifest["version"])
 
     def _build_manifest(
         self,
@@ -142,6 +165,10 @@ class FileRegistryStore:
 
     def _write_manifest(self, version_dir: Path, manifest: dict[str, Any]) -> None:
         (version_dir / "manifest.json").write_text(json.dumps(manifest, indent=2), encoding="utf-8")
+
+    def _with_ratings(self, manifest: dict[str, Any]) -> dict[str, Any]:
+        summary = self.ratings.compact_summary(loop_id=str(manifest.get("id", "")), version=str(manifest.get("version", "")))
+        return {**manifest, **summary}
 
 
 def _parse_ref(ref: str) -> tuple[str, str | None]:

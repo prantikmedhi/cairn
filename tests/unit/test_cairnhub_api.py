@@ -139,3 +139,50 @@ def test_cairnhub_verified_publishers_require_api_key_and_mark_manifest(tmp_path
     verified_only = client.get("/api/v1/loops", params={"verified_only": "true"})
     assert verified_only.status_code == 200
     assert verified_only.json()["count"] == 1
+
+
+def test_cairnhub_ratings_summary_and_filtering(tmp_path) -> None:
+    client = TestClient(create_app(registry_path=tmp_path / "hub"))
+
+    publish = client.post(
+        "/api/v1/loops",
+        json={"yaml": SAMPLE_LOOP, "source_file": "rated.crn", "publisher": "Cairn Labs"},
+    )
+    assert publish.status_code == 201
+
+    first = client.post(
+        "/api/v1/loops/hosted-hello/versions/0.2.0/ratings",
+        json={"score": 5, "reviewer": "alice", "comment": "Great loop"},
+    )
+    assert first.status_code == 201
+    assert first.json()["average_score"] == 5.0
+    assert first.json()["ratings_count"] == 1
+
+    second = client.post(
+        "/api/v1/loops/hosted-hello/versions/0.2.0/ratings",
+        json={"score": 3, "reviewer": "bob", "comment": "Solid base"},
+    )
+    assert second.status_code == 201
+    assert second.json()["average_score"] == 4.0
+    assert second.json()["ratings_count"] == 2
+    assert second.json()["distribution"] == {"1": 0, "2": 0, "3": 1, "4": 0, "5": 1}
+
+    summary = client.get("/api/v1/loops/hosted-hello/versions/0.2.0/ratings")
+    assert summary.status_code == 200
+    assert summary.json()["average_score"] == 4.0
+    assert len(summary.json()["ratings"]) == 2
+
+    latest = client.get("/api/v1/loops/hosted-hello")
+    assert latest.status_code == 200
+    assert latest.json()["average_score"] == 4.0
+    assert latest.json()["ratings_count"] == 2
+
+    filtered = client.get("/api/v1/loops", params={"min_rating": "4"})
+    assert filtered.status_code == 200
+    assert filtered.json()["count"] == 1
+
+    rejected = client.post(
+        "/api/v1/loops/hosted-hello/versions/0.2.0/ratings",
+        json={"score": 0, "reviewer": "eve"},
+    )
+    assert rejected.status_code == 422

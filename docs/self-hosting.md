@@ -73,6 +73,18 @@ curl -X POST http://127.0.0.1:8790/api/v1/loops \
   }'
 ```
 
+Rate published loop:
+
+```bash
+curl -X POST http://127.0.0.1:8790/api/v1/loops/verified-hello/versions/0.1.0/ratings \
+  -H "Content-Type: application/json" \
+  -d '{
+    "score": 5,
+    "reviewer": "alice",
+    "comment": "Clean starter loop"
+  }'
+```
+
 ## Checkpointing
 
 ```bash
@@ -84,4 +96,5 @@ python3 -m cairn.main run cairnlang/examples/data-pipeline.crn --resume /tmp/pip
 
 - Hosted CairnHub file-backed API foundation now built
 - API-key auth and verified publisher registry now built for self-hosting
-- Ratings and shared multi-node search remain future work
+- Ratings now built with per-version summaries and review entries
+- Shared multi-node search remains future work

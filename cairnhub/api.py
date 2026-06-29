@@ -25,6 +25,12 @@ class PublishLoopRequest(BaseModel):
     homepage: str | None = Field(default=None, description="Project homepage")
 
 
+class RateLoopRequest(BaseModel):
+    score: int = Field(..., ge=1, le=5, description="Integer rating from 1 to 5")
+    reviewer: str = Field(..., min_length=1, description="Reviewer name or handle")
+    comment: str | None = Field(default=None, description="Optional short review text")
+
+
 def create_app(
     registry_path: str | Path | None = None,
     publishers_path: str | Path | None = None,
@@ -53,10 +59,17 @@ def create_app(
         return {"publishers": publisher_registry.list_public(), "count": publisher_registry.count()}
 
     @app.get("/api/v1/loops")
-    def list_registry_loops(q: str | None = None, limit: int = 50, verified_only: bool = False) -> dict[str, object]:
+    def list_registry_loops(
+        q: str | None = None,
+        limit: int = 50,
+        verified_only: bool = False,
+        min_rating: float | None = None,
+    ) -> dict[str, object]:
         results = store.search_loops(q or "") if q is not None else store.list_loops()
         if verified_only:
             results = [item for item in results if item.get("publisher_verified") is True]
+        if min_rating is not None:
+            results = [item for item in results if (item.get("average_score") or 0) >= min_rating]
         safe_limit = max(1, min(limit, 200))
         return {"loops": results[:safe_limit], "count": len(results[:safe_limit]), "total": len(results)}
 
@@ -111,6 +124,27 @@ def create_app(
             return store.load_source_text(f"{loop_id}@{version}")
         except FileNotFoundError as exc:
             raise HTTPException(status_code=404, detail=str(exc)) from exc
+
+    @app.get("/api/v1/loops/{loop_id}/versions/{version}/ratings")
+    def get_loop_ratings(loop_id: str, version: str) -> dict[str, Any]:
+        try:
+            return store.get_ratings(f"{loop_id}@{version}")
+        except FileNotFoundError as exc:
+            raise HTTPException(status_code=404, detail=str(exc)) from exc
+
+    @app.post("/api/v1/loops/{loop_id}/versions/{version}/ratings", status_code=201)
+    def rate_loop(loop_id: str, version: str, payload: RateLoopRequest) -> dict[str, Any]:
+        try:
+            return store.submit_rating(
+                f"{loop_id}@{version}",
+                score=payload.score,
+                reviewer=payload.reviewer,
+                comment=payload.comment,
+            )
+        except FileNotFoundError as exc:
+            raise HTTPException(status_code=404, detail=str(exc)) from exc
+        except ValueError as exc:
+            raise HTTPException(status_code=400, detail=str(exc)) from exc
 
     return app
 
