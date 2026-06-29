@@ -9,4 +9,5 @@ Key docs:
 - [observability.md](/Users/prantikpratimmedhi/Documents/Cairn/docs/observability.md)
 - [plugin-development.md](/Users/prantikpratimmedhi/Documents/Cairn/docs/plugin-development.md)
 - [self-hosting.md](/Users/prantikpratimmedhi/Documents/Cairn/docs/self-hosting.md)
+- [../cairnhub/README.md](/Users/prantikpratimmedhi/Documents/Cairn/cairnhub/README.md)
 - [../cairnstudio/README.md](/Users/prantikpratimmedhi/Documents/Cairn/cairnstudio/README.md)

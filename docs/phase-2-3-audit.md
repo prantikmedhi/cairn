@@ -8,6 +8,7 @@ This audit separates local repo-complete items from still-pending hosted or comm
 - sub-loop composition
 - checkpoint/resume
 - local registry `publish/install/list/search/inspect`
+- hosted CairnHub file-backed API `publish/list/search/inspect/source`
 - retry guards
 - circuit breaker foundation
 - parallel fan-out execution
@@ -19,9 +20,8 @@ This audit separates local repo-complete items from still-pending hosted or comm
 
 ## Still Pending
 
-- hosted CairnHub backend
 - verified publishers
 - ratings
-- shared remote search
+- shared multi-node remote search/index
 - rich hosted CairnLens observability UI
 - community/adoption milestones from PRD

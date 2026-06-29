@@ -1,16 +1,26 @@
 # CairnHub
 
-This directory now contains local registry foundation for later CairnHub work.
+This directory now contains both local registry foundation and hosted API foundation.
 
 Current scope:
 
 - publish loop files into local registry path
+- publish raw loop YAML into hosted file-backed registry
 - install loops from local registry path
-- list and inspect published manifests
+- list, search, inspect, and fetch published manifests/source
+- FastAPI app for self-hosted CairnHub foundation
 
-Not built yet:
+Run hosted API:
 
-- hosted API
+```bash
+pip install -e ".[hub]"
+uvicorn cairnhub.api:app --host 127.0.0.1 --port 8790
+```
+
+Still not built:
+
 - auth and publishers
-- search and ratings
-- version resolution across remote registry
+- verified publishers
+- ratings
+- shared multi-node search/index
+- version resolution across remote registry peers

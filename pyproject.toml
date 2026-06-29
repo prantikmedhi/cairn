@@ -5,12 +5,41 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "cairn"
 version = "0.1.0"
-description = "Open runtime and DSL for intelligent task loops"
+description = "Universal DSL and runtime for agent loop engineering — portable AI agent loops across LangChain, LangGraph, CrewAI, AutoGen, and OpenAI"
 readme = "README.md"
 requires-python = ">=3.10"
 license = { text = "Apache-2.0" }
 authors = [
   { name = "Cairn Contributors" }
+]
+keywords = [
+  "loop-engineering",
+  "agent-loops",
+  "ai-agents",
+  "agent-orchestration",
+  "langchain",
+  "langgraph",
+  "crewai",
+  "autogen",
+  "openai-agents",
+  "agent-framework",
+  "workflow-engine",
+  "task-loops",
+  "ai-pipeline",
+  "dsl",
+  "llm-orchestration"
+]
+classifiers = [
+  "Development Status :: 3 - Alpha",
+  "Intended Audience :: Developers",
+  "Topic :: Scientific/Engineering :: Artificial Intelligence",
+  "Topic :: Software Development :: Libraries :: Application Frameworks",
+  "License :: OSI Approved :: Apache Software License",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Operating System :: OS Independent",
 ]
 dependencies = [
   "Jinja2>=3.1",
@@ -22,7 +51,14 @@ dependencies = [
 
 [project.optional-dependencies]
 dev = [
-  "pytest>=8.0"
+  "pytest>=8.0",
+  "fastapi>=0.111",
+  "httpx>=0.27"
+]
+hub = [
+  "fastapi>=0.111",
+  "uvicorn>=0.30",
+  "httpx>=0.27"
 ]
 langchain = [
   "langchain-core>=0.3"
@@ -32,7 +68,7 @@ langchain = [
 cairn = "cairn.main:main"
 
 [tool.setuptools.packages.find]
-include = ["cairn*", "cairnforge*"]
+include = ["cairn*", "cairnforge*", "cairnhub*"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

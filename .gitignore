@@ -8,6 +8,7 @@ __pycache__/
 venv/
 *.egg-info/
 cairnstudio/sessions/
+.cairnhub-hosted/
 
 # Node
 node_modules/
