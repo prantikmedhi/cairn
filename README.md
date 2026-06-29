@@ -5,205 +5,153 @@
 [![PyPI](https://img.shields.io/badge/pypi-v0.1.0-blue)](https://pypi.org/project/cairn/)
 [![Python](https://img.shields.io/badge/python-3.10%2B-blue)](https://www.python.org/)
 
-**Cairn** is the open-source DSL and runtime purpose-built for **agent loop engineering** — defining, validating, and executing portable AI agent task loops across any framework. Think of it as "Terraform for agent loops": write your loop definition once in `.crn` format and run it on LangChain, LangGraph, CrewAI, AutoGen, or OpenAI Agents SDK without rewriting.
+**Cairn** is the open-source Domain-Specific Language (DSL) and runtime purpose-built for **agent loop engineering**. It empowers you to define, validate, and execute portable AI agent task loops across any major framework. 
 
-```txt
+Think of Cairn as "Terraform for agent loops"—write your orchestration logic once in a portable `.crn` format and seamlessly run it on LangChain, LangGraph, CrewAI, AutoGen, or the OpenAI Agents SDK without rewriting a single line of code.
+
+```text
 ┌─────────────────────────────────────────────────────┐
-│  One loop definition → Any agent framework           │
-│  "Write once, run anywhere" for AI agent loops       │
+│  One loop definition → Any agent framework          │
+│  "Write once, run anywhere" for AI agent loops      │
 └─────────────────────────────────────────────────────┘
 ```
 
-## Why Loop Engineering Matters
+---
 
-Every AI agent framework defines loops differently. LangGraph uses state graphs, CrewAI uses sequential tasks, AutoGen uses conversation loops. This fragmentation makes **loop engineering** a bottleneck — migrating between frameworks means rewriting your entire orchestration logic.
+## 📖 Table of Contents
 
-Cairn solves this with a **vendor-agnostic loop specification** that decouples loop structure from framework execution. Your agent loop becomes portable, testable, and shareable.
+- [Why Loop Engineering Matters](#why-loop-engineering-matters)
+- [Project Status](#project-status)
+- [Core Concepts](#core-concepts)
+- [Quickstart: Loop Engineering in 30 Seconds](#quickstart-loop-engineering-in-30-seconds)
+- [Key Features](#key-features)
+- [Architecture](#architecture)
+- [Documentation](#documentation)
+- [Contributing](#contributing)
 
-- Define **agent loops** once in portable `.crn` files
-- Validate loop structure before execution
-- Run loops through a stable runtime and plugin contract
-- Keep orchestration logic separate from framework lock-in
+---
 
-## Quick Stats
+## ⚡ Why Loop Engineering Matters
 
-| Metric | Value |
-|--------|-------|
-| Version | 0.1.0 |
-| License | Apache 2.0 |
-| Runtime | Python 3.10+ |
-| DSL Format | YAML (`.crn`) |
-| Frameworks | LangChain, LangGraph, CrewAI, AutoGen, OpenAI |
-| CLI Commands | 17 |
-| Status | Phases 1-3 complete, Phase 4 beta |
+Every AI agent framework defines loops differently. LangGraph relies on state graphs, CrewAI uses sequential tasks, and AutoGen orchestrates conversational loops. This fragmentation makes **agent loop engineering** a massive bottleneck. Migrating between frameworks often means throwing away and rewriting your entire orchestration logic.
 
-## Project Status
+Cairn solves this problem by introducing a **vendor-agnostic loop specification** that decouples your loop structure from the underlying framework's execution engine.
 
-- **Phases 1-3**: Core loop engineering foundations complete — parser, validator, executor, plugins, CLI, checkpointing, parallel execution, observability
-- **Phase 4 Beta**: CairnStudio visual loop editor — drag-and-drop loop engineering without raw YAML
-- **On the roadmap**: hosted registry, team collaboration, VS Code extension, CI/CD loop validation
+With Cairn, you can:
+- Define **portable agent loops** once in readable `.crn` files.
+- Rigorously validate loop structure and data flow before execution.
+- Run loops through a stable runtime that guarantees execution consistency.
+- Eliminate framework lock-in and keep your orchestration logic purely declarative.
 
-## Agent Loop Engineering — Core Concepts
+## 🚀 Project Status
 
-Cairn treats loop engineering as a first-class discipline. A loop is defined declaratively in `.crn` format with:
+Cairn is rapidly evolving to support the needs of modern AI engineering teams:
+
+- **Phases 1-3 (Stable)**: Core loop engineering foundations are complete. This includes the parser, validator, executor, multi-framework plugins, CLI, checkpointing, parallel execution, and observability.
+- **Phase 4 Beta**: The **CairnStudio visual loop editor** is in active beta—bringing drag-and-drop loop engineering to your browser without needing to write raw YAML.
+- **On the Roadmap**: A hosted loop registry for sharing architectures, robust team collaboration features, a dedicated VS Code extension, and native CI/CD loop validation hooks.
+
+## 🧠 Core Concepts
+
+Cairn elevates agent loop engineering to a first-class discipline. A loop is defined declaratively in the `.crn` format using the following primitives:
 
 | Concept | Description |
 |---------|-------------|
-| **States** | Individual steps in your agent loop (collect, template, condition, sub-loop) |
-| **Transitions** | State-to-state routing for loop flow control |
-| **Budget Guards** | Max iterations, duration, and cost caps to prevent runaway loops |
-| **Retry & Circuit Breaker** | Resilient loop engineering with exponential backoff |
-| **Parallel Fan-Out** | Fork/join patterns for concurrent agent execution |
-| **Checkpoint/Resume** | Save and restore loop execution state |
-| **Sub-loop Composition** | Import and compose loops from local files |
+| **States** | Individual steps in your agent loop (e.g., collect, template, condition, sub-loop). |
+| **Transitions** | Explicit state-to-state routing for precise loop flow control. |
+| **Budget Guards** | Hard caps on iterations, duration, and token cost to prevent runaway loops. |
+| **Retry & Circuit Breakers** | Resilient loop engineering primitives with exponential backoff. |
+| **Parallel Fan-Out** | Fork/join execution patterns for concurrent agent tasks. |
+| **Checkpoint/Resume** | Native support for saving and restoring long-running loop execution states. |
+| **Sub-loop Composition** | Modular engineering by importing and composing loops from local files. |
 
-## Architecture
+## ⏱️ Quickstart: Loop Engineering in 30 Seconds
 
+Get up and running with Cairn's local development environment immediately:
+
+```bash
+# Clone the repository
+git clone https://github.com/prantikmedhi/cairn.git
+cd cairn
+
+# Set up a virtual environment
+python3 -m venv .venv
+source .venv/bin/activate
+
+# Install Cairn with developer dependencies
+pip install -e ".[dev]"
+
+# Validate your first agent loop
+python3 -m cairn.main validate cairnlang/examples/hello-world.crn
+
+# Run the loop through the local Forge runtime
+python3 -m cairn.main run cairnlang/examples/hello-world.crn --input message=forge
 ```
+
+## ✨ Key Features
+
+Cairn provides a complete toolkit for professional agent orchestration:
+
+### 1. Multi-Framework Execution
+Execute your `.crn` loops natively on your preferred backend:
+- **`langchain`** — Native `langchain-core` runnable execution
+- **`langgraph`** — Advanced state graph adapter
+- **`crewai`** — Sequential task orchestration adapter
+- **`autogen`** — Conversation loop adapter
+- **`openai`** — OpenAI Agents SDK adapter
+
+### 2. Resilient Loop Patterns
+- **Sub-loop Composition**: Break complex agents down into reusable modules.
+- **Checkpoint/Resume**: Pause execution and pick up right where you left off.
+- **Circuit Breakers**: Prevent systemic failures with robust retry guards and exponential backoff.
+- **Parallel Fan-Out**: Execute independent agent tasks concurrently and join the results.
+
+### 3. Developer Tooling
+Cairn ships with a powerful Typer-based CLI providing 17 specialized commands, including `validate`, `run`, `trace`, `debug`, `cost`, and `studio`. 
+
+Easily export JSON traces for replay, manage loops in your local **CairnHub** registry, and dynamically inject variables using Jinja2 templating.
+
+## 🏗️ Architecture
+
+Cairn's architecture is modular, ensuring high performance and extensibility across the AI ecosystem:
+
+```text
 ┌─────────────┐    ┌──────────────┐    ┌──────────────┐
-│  CairnLang   │ ──▶│  CairnForge  │ ──▶│   Plugins    │
-│  (.crn DSL)  │    │  (Runtime)   │    │              │
-│  Parser      │    │  Validator   │    │  LangChain   │
-│  Schema      │    │  Executor    │    │  LangGraph   │
-│  Examples    │    │  Budget      │    │  CrewAI      │
+│  CairnLang  │ ──▶│  CairnForge  │ ──▶│   Plugins    │
+│  (.crn DSL) │    │  (Runtime)   │    │              │
+│  Parser     │    │  Validator   │    │  LangChain   │
+│  Schema     │    │  Executor    │    │  LangGraph   │
+│  Examples   │    │  Budget      │    │  CrewAI      │
 └─────────────┘    │  Checkpoint  │    │  AutoGen     │
                    │  Retry       │    │  OpenAI      │
                    └──────────────┘    └──────────────┘
 ┌─────────────┐    ┌──────────────┐    ┌──────────────┐
-│  Cairn CLI   │    │  CairnHub    │    │  CairnStudio │
-│  17 commands │    │  Registry    │    │  Visual IDE  │
-│  validate    │    │  publish     │    │  drag & drop │
-│  run         │    │  install     │    │  live val.   │
-│  trace       │    │  search      │    │  trace rep.  │
-│  debug       │    │  inspect     │    │  collab sync │
+│  Cairn CLI  │    │  CairnHub    │    │  CairnStudio │
+│ 17 commands │    │  Registry    │    │  Visual IDE  │
+│  validate   │    │  publish     │    │  drag & drop │
+│  run        │    │  install     │    │  live val.   │
+│  trace      │    │  search      │    │  trace rep.  │
+│  debug      │    │  inspect     │    │  collab sync │
 └─────────────┘    └──────────────┘    └──────────────┘
 ```
 
-## Repository Map
+## 📚 Documentation
 
-- [PRD.md](PRD.md): full product requirements
-- [roadmap.md](roadmap.md): phased delivery plan
-- [architecture.md](architecture.md): MVP technical direction
-- [tasks.md](tasks.md): prioritized build backlog
-- [docs/getting-started.md](docs/getting-started.md): implementation kickoff guide
+Dive deeper into agent loop engineering with our comprehensive documentation:
 
-## Workspace Layout
+- **[Getting Started](docs/getting-started.md)**: Your first steps with Cairn.
+- **[CLI Reference](docs/cli-reference.md)**: Deep dive into all 17 CLI commands.
+- **[Plugin Development](docs/plugin-development.md)**: Guide to building custom framework adapters.
+- **[Observability](docs/observability.md)**: Trace exports and Grafana dashboards.
+- **[Self-Hosting](docs/self-hosting.md)**: Deploy your own secure CairnHub registry.
+- **[Language Spec](cairnlang/SPEC.md)**: The complete CairnLang `.crn` specification.
+- **[Architecture Overview](architecture.md)**: System design and internal mechanics.
+- **[Changelog](CHANGELOG.md)**: What's new in v0.1.0.
 
-```
-cairnlang/     Language spec, JSON Schema, and .crn examples
-cairnforge/    Parser, validator, budget guard, executor, plugins
-cairn/         Typer CLI (17 commands)
-cairnhub/      Local registry for loop publishing/discovery
-cairnstudio/   Visual loop editor (Phase 4 beta)
-tests/         Unit, integration, and e2e coverage
-docs/          Documentation and guides
-```
+## 🤝 Contributing
 
-## Working Commands
+We welcome contributions from the community! Please read our [Contributing Guide](CONTRIBUTING.md) and our [Code of Conduct](CODE_OF_CONDUCT.md) to get started.
 
-```bash
-pip install -e ".[dev]"
-pip install -e ".[langchain]"   # optional native langchain-core runnable path
-python3 -m cairn.main validate cairnlang/examples/hello-world.crn
-python3 -m cairn.main run cairnlang/examples/hello-world.crn --input message=forge
-python3 -m cairn.main run cairnlang/examples/retry-recovery.crn
-python3 -m cairn.main run cairnlang/examples/parallel-fanout.crn
-python3 -m cairn.main run cairnlang/examples/hello-world.crn --target langgraph --input message=graph
-python3 -m cairn.main init ./demo-loop
-python3 -m cairn.main run cairnlang/examples/data-pipeline.crn --checkpoint-file /tmp/pipeline.json --max-steps 1
-python3 -m cairn.main run cairnlang/examples/data-pipeline.crn --resume /tmp/pipeline.json
-python3 -m cairn.main publish cairnlang/examples/hello-world.crn --registry .cairnhub
-python3 -m cairn.main list --registry .cairnhub
-python3 -m cairn.main search hello --registry .cairnhub
-python3 -m cairn.main debug cairnlang/examples/retry-recovery.crn
-python3 -m cairn.main cost cairnlang/examples/parallel-fanout.crn
-python3 -m cairn.main test
-python3 -m cairn.main studio --port 8787
-PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 python3 -m pytest -q
-```
+## 📄 License
 
-## Quickstart — Loop Engineering in 30 Seconds
-
-```bash
-git clone https://github.com/prantikmedhi/cairn.git
-cd cairn
-python3 -m venv .venv
-source .venv/bin/activate
-pip install -e ".[dev]"
-python3 -m cairn.main validate cairnlang/examples/hello-world.crn
-python3 -m cairn.main run cairnlang/examples/hello-world.crn --input message=forge
-```
-
-## Implemented — Complete Agent Loop Engineering Toolkit
-
-**Core Loop Engineering**
-- YAML `.crn` parsing with full AST
-- JSON Schema validation (CairnLang 1.0)
-- Semantic validation for states, transitions, and budgets
-- Execution engine with transition resolution and lifecycle hooks
-- Budget enforcement: max iterations, duration, and cost caps
-- State machine with configurable routing
-
-**Multi-Framework Execution**
-- `langchain` — native `langchain-core` runnable execution
-- `langgraph` — state graph adapter
-- `crewai` — sequential task adapter
-- `autogen` — conversation loop adapter
-- `openai` — agents SDK adapter
-- Extensible plugin system for custom targets
-
-**Resilient Loop Patterns**
-- Sub-loop composition with relative file imports
-- Checkpoint/resume for long-running loops
-- Retry guards with exponential backoff
-- Circuit breaker for repeated failures
-- Parallel fan-out with fork/join patterns
-
-**Developer Tooling**
-- 17 CLI commands: `init`, `validate`, `run`, `inspect`, `trace`, `publish`, `install`, `list`, `search`, `registry-inspect`, `debug`, `cost`, `test`, `watch`, `studio`
-- Trace JSON export with replay-friendly output
-- Local CairnHub registry: publish, install, search, inspect
-- Optional Jinja2 templating for dynamic expressions
-
-**CairnStudio Visual Editor (Beta)**
-- Drag-and-drop loop canvas
-- Real-time YAML ↔ canvas synchronization
-- Live validation with error feedback
-- Preview execution with visual trace replay
-- YAML import/export (.crn files)
-- Local shared-session collaboration
-
-**Examples**
-- Hello world, branching review, data pipeline
-- Budget guard, circuit breaker, retry recovery
-- Parallel fan-out, failure hooks, composed sub-loops
-
-## Roadmap
-
-| Phase | Status | Focus |
-|-------|--------|-------|
-| 1 | ✅ Complete | Core DSL, parser, validator, basic executor |
-| 2 | ✅ Complete | Plugins, CLI, local registry, checkpointing |
-| 3 | ✅ Complete | Retry, circuit breaker, parallel execution, observability |
-| 4 | 🚧 Beta | CairnStudio visual editor, collaboration sync |
-| 5 | 📋 Planned | Hosted registry, remote discovery, auth, ratings |
-| 6 | 📋 Planned | VS Code extension, CI/CD loop validation |
-
-## Documentation
-
-- [Getting Started](docs/getting-started.md) — start here
-- [CLI Reference](docs/cli-reference.md) — all 17 commands
-- [Plugin Development](docs/plugin-development.md) — build custom adapters
-- [Observability](docs/observability.md) — trace export and Grafana dashboard
-- [Self-Hosting](docs/self-hosting.md) — deploy your own registry
-- [Language Spec](cairnlang/SPEC.md) — complete CairnLang specification
-- [Architecture](architecture.md) — system design overview
-- [Changelog](CHANGELOG.md) — v0.1.0 release notes
-
-## Contributing
-
-See [CONTRIBUTING.md](CONTRIBUTING.md) and [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md).
-
-## License
-
-Apache 2.0 — see [LICENSE](LICENSE).
+Cairn is licensed under the Apache 2.0 License. See the [LICENSE](LICENSE) file for more details.

@@ -1,4 +1,6 @@
-# Release v0.1.0 Checklist
+# Release v0.1.0 Checklist — Agent Loop Engineering
+*Comprehensive documentation for Cairn, the universal DSL and runtime for **agent loop engineering**.*
+
 
 This checklist is for first public Cairn MVP release.
 

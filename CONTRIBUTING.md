@@ -1,4 +1,6 @@
 # Contributing to Cairn — Agent Loop Engineering Platform
+*Comprehensive documentation for Cairn, the universal DSL and runtime for **agent loop engineering**.*
+
 
 ## Local Setup
 

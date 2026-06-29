@@ -1,4 +1,6 @@
 # Getting Started with Cairn — Agent Loop Engineering Guide
+*Comprehensive documentation for Cairn, the universal DSL and runtime for **agent loop engineering**.*
+
 
 Start here to build your first portable AI agent loop with Cairn. This guide covers the loop engineering workflow: defining, validating, and running agent loops that work across LangChain, LangGraph, CrewAI, AutoGen, and OpenAI.
 

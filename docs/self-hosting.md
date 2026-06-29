@@ -1,4 +1,4 @@
-# Self-Hosting Cairn — Deploy Your Own Agent Loop Registry
+# Self-Hosting Cairn — Deploy Your Own Agent Loop Registry (Agent Loop Engineering)
 
 Current self-hosting scope for the Cairn agent loop engineering platform is local-first.
 

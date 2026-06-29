@@ -1,4 +1,6 @@
 # Cairn — Universal DSL & Runtime for Agent Loop Engineering
+*Comprehensive documentation for Cairn, the universal DSL and runtime for **agent loop engineering**.*
+
 
 ## Product Requirements Document
 

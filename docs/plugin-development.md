@@ -1,4 +1,4 @@
-# Plugin Development — Build Custom Agent Loop Framework Adapters
+# Plugin Development — Build Custom Agent Loop Framework Adapters (Agent Loop Engineering)
 
 This document defines the Cairn plugin SDK surface for extending agent loop engineering to custom frameworks.
 

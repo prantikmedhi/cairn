@@ -1,4 +1,6 @@
-# Cairn MVP Feature Audit
+# Cairn MVP Feature Audit — Agent Loop Engineering
+*Comprehensive documentation for Cairn, the universal DSL and runtime for **agent loop engineering**.*
+
 
 This audit compares current repo state to PRD Phase 1 requirements.
 

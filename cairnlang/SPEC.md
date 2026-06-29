@@ -1,4 +1,4 @@
-# CairnLang Specification — Agent Loop DSL Reference
+# CairnLang Specification — Agent Loop DSL Reference (Agent Loop Engineering)
 
 This is the working specification for `cairn: 1.0`, the portable DSL for agent loop engineering. CairnLang defines a framework-agnostic loop format that runs across LangChain, LangGraph, CrewAI, AutoGen, and OpenAI.
 

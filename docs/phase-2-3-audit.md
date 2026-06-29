@@ -1,4 +1,6 @@
-# Phase 2-3 Audit
+# Phase 2-3 Audit (Agent Loop Engineering)
+*Comprehensive documentation for Cairn, the universal DSL and runtime for **agent loop engineering**.*
+
 
 This audit separates local repo-complete items from still-pending hosted or community items.
 
