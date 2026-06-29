@@ -1,0 +1,50 @@
+name: Bug report
+description: Report runtime, CLI, parser, validator, docs, or example-loop bugs
+title: "[bug] "
+labels:
+  - bug
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Use concrete repro steps. Include `.crn` snippet or command when possible.
+  - type: textarea
+    id: summary
+    attributes:
+      label: Summary
+      description: What broke?
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Reproduction
+      description: Exact commands, loop file, and inputs
+      placeholder: |
+        1. Run `python3 -m cairn.main validate ...`
+        2. Use this `.crn` snippet
+        3. Observe this failure
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual behavior
+    validations:
+      required: true
+  - type: input
+    id: python
+    attributes:
+      label: Python version
+      placeholder: "3.11.9"
+  - type: textarea
+    id: extra
+    attributes:
+      label: Extra context
+      description: Stack trace, screenshots, failing loop fragment, environment notes

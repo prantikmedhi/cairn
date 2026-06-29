@@ -1,0 +1,40 @@
+name: Feature request
+description: Propose MVP-safe features or future-phase capabilities
+title: "[feature] "
+labels:
+  - enhancement
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Tie request to real user need. For large ideas, map to Phase 1, 2, 3, or 4 from roadmap.
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem
+      description: What user or developer pain does this solve?
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed solution
+      description: Keep scope concrete. Mention CLI, schema, runtime, plugin, docs, or tests.
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+  - type: dropdown
+    id: phase
+    attributes:
+      label: Best-fit roadmap phase
+      options:
+        - Phase 1 Foundation
+        - Phase 2 Multi-Framework
+        - Phase 3 Production
+        - Phase 4 Visual
+        - Unknown
+    validations:
+      required: true

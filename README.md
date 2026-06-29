@@ -91,6 +91,12 @@ python3 -m cairn.main run cairnlang/examples/hello-world.crn --input message=for
 
 Read [CONTRIBUTING.md](/Users/prantikpratimmedhi/Documents/Cairn/CONTRIBUTING.md) for Phase 1 guardrails and [CODE_OF_CONDUCT.md](/Users/prantikpratimmedhi/Documents/Cairn/CODE_OF_CONDUCT.md) for community expectations.
 
+## Release
+
+- Current version: `0.1.0`
+- Release notes: [CHANGELOG.md](/Users/prantikpratimmedhi/Documents/Cairn/CHANGELOG.md)
+- Release checklist: [docs/release-v0.1.0.md](/Users/prantikpratimmedhi/Documents/Cairn/docs/release-v0.1.0.md)
+
 ## Recommended First Build Slice
 
 1. Finalize the minimal language spec.

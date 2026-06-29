@@ -1,0 +1,5 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Cairn architecture and roadmap
+    url: https://github.com/prantikmedhi/cairn/blob/main/PRD.md
+    about: Read product vision and roadmap before opening broad design requests.
