@@ -72,3 +72,70 @@ def test_cairnhub_publish_rejects_invalid_loop(tmp_path) -> None:
 
     assert response.status_code == 400
     assert "Missing top-level 'loop' object" in response.json()["detail"]
+
+
+def test_cairnhub_verified_publishers_require_api_key_and_mark_manifest(tmp_path) -> None:
+    publishers_file = tmp_path / "publishers.json"
+    publishers_file.write_text(
+        """
+{
+  "publishers": [
+    {
+      "id": "cairn-labs",
+      "display_name": "Cairn Labs",
+      "api_key": "secret-key",
+      "homepage": "https://example.com/cairn-labs",
+      "verified": true
+    }
+  ]
+}
+""".strip(),
+        encoding="utf-8",
+    )
+    client = TestClient(create_app(registry_path=tmp_path / "hub", publishers_path=publishers_file))
+
+    missing_key = client.post(
+        "/api/v1/loops",
+        json={"yaml": SAMPLE_LOOP, "source_file": "verified.crn", "publisher_id": "cairn-labs"},
+    )
+    assert missing_key.status_code == 401
+    assert "Missing API key" in missing_key.json()["detail"]
+
+    wrong_key = client.post(
+        "/api/v1/loops",
+        headers={"X-API-Key": "wrong-key"},
+        json={"yaml": SAMPLE_LOOP, "source_file": "verified.crn", "publisher_id": "cairn-labs"},
+    )
+    assert wrong_key.status_code == 401
+    assert "Invalid API key" in wrong_key.json()["detail"]
+
+    publish = client.post(
+        "/api/v1/loops",
+        headers={"X-API-Key": "secret-key"},
+        json={"yaml": SAMPLE_LOOP, "source_file": "verified.crn", "publisher_id": "cairn-labs"},
+    )
+    assert publish.status_code == 201
+    manifest = publish.json()
+    assert manifest["publisher_id"] == "cairn-labs"
+    assert manifest["publisher"] == "Cairn Labs"
+    assert manifest["publisher_verified"] is True
+    assert manifest["publisher_homepage"] == "https://example.com/cairn-labs"
+
+    publishers = client.get("/api/v1/publishers")
+    assert publishers.status_code == 200
+    assert publishers.json()["count"] == 1
+    assert publishers.json()["publishers"][0] == {
+        "id": "cairn-labs",
+        "display_name": "Cairn Labs",
+        "homepage": "https://example.com/cairn-labs",
+        "verified": True,
+    }
+
+    health = client.get("/health")
+    assert health.status_code == 200
+    assert health.json()["auth_enabled"] is True
+    assert health.json()["publishers_count"] == 1
+
+    verified_only = client.get("/api/v1/loops", params={"verified_only": "true"})
+    assert verified_only.status_code == 200
+    assert verified_only.json()["count"] == 1

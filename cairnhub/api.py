@@ -4,53 +4,88 @@ import os
 from pathlib import Path
 from typing import Any
 
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, Header, HTTPException
 from fastapi.responses import PlainTextResponse
 from pydantic import BaseModel, Field
 
+from cairnhub.publishers import PublisherRegistry
 from cairnhub.store import FileRegistryStore
 
 
 DEFAULT_REGISTRY_PATH = ".cairnhub-hosted"
+DEFAULT_PUBLISHERS_PATH = ".cairnhub-publishers.json"
 
 
 class PublishLoopRequest(BaseModel):
     yaml: str = Field(..., description="Raw Cairn loop YAML text")
     source_file: str = Field("loop.crn", description="Original filename for stored artifact")
+    publisher_id: str | None = Field(default=None, description="Publisher id for authenticated publish")
     publisher: str | None = Field(default=None, description="Publisher display name")
     topics: list[str] = Field(default_factory=list, description="Search topics")
     homepage: str | None = Field(default=None, description="Project homepage")
 
 
-def create_app(registry_path: str | Path | None = None) -> FastAPI:
+def create_app(
+    registry_path: str | Path | None = None,
+    publishers_path: str | Path | None = None,
+) -> FastAPI:
     app = FastAPI(
         title="CairnHub API",
         version="0.1.0",
-        description="Hosted CairnHub registry foundation for publishing, listing, search, inspect, and source fetch.",
+        description="Hosted CairnHub registry foundation for publishing, listing, search, inspect, source fetch, and verified publisher auth.",
     )
     store = FileRegistryStore(registry_path or os.environ.get("CAIRN_HUB_REGISTRY_PATH", DEFAULT_REGISTRY_PATH))
+    publisher_registry = PublisherRegistry(
+        publishers_path or os.environ.get("CAIRN_HUB_PUBLISHERS_PATH", DEFAULT_PUBLISHERS_PATH)
+    )
 
     @app.get("/health")
     def health() -> dict[str, object]:
-        return {"ok": True, "registry_path": str(store.registry_root.resolve())}
+        return {
+            "ok": True,
+            "registry_path": str(store.registry_root.resolve()),
+            "auth_enabled": publisher_registry.enabled(),
+            "publishers_count": publisher_registry.count(),
+        }
+
+    @app.get("/api/v1/publishers")
+    def list_publishers() -> dict[str, object]:
+        return {"publishers": publisher_registry.list_public(), "count": publisher_registry.count()}
 
     @app.get("/api/v1/loops")
-    def list_registry_loops(q: str | None = None, limit: int = 50) -> dict[str, object]:
+    def list_registry_loops(q: str | None = None, limit: int = 50, verified_only: bool = False) -> dict[str, object]:
         results = store.search_loops(q or "") if q is not None else store.list_loops()
+        if verified_only:
+            results = [item for item in results if item.get("publisher_verified") is True]
         safe_limit = max(1, min(limit, 200))
         return {"loops": results[:safe_limit], "count": len(results[:safe_limit]), "total": len(results)}
 
     @app.post("/api/v1/loops", status_code=201)
-    def publish_registry_loop(payload: PublishLoopRequest) -> dict[str, Any]:
+    def publish_registry_loop(payload: PublishLoopRequest, x_api_key: str | None = Header(default=None)) -> dict[str, Any]:
+        metadata = {
+            "publisher_id": payload.publisher_id,
+            "publisher": payload.publisher,
+            "publisher_verified": False,
+            "homepage": payload.homepage,
+            "topics": payload.topics,
+        }
+        if publisher_registry.enabled():
+            if not payload.publisher_id:
+                raise HTTPException(status_code=400, detail="publisher_id required when publisher auth enabled")
+            try:
+                publisher = publisher_registry.authenticate(payload.publisher_id, x_api_key)
+            except LookupError as exc:
+                raise HTTPException(status_code=404, detail=str(exc)) from exc
+            except PermissionError as exc:
+                raise HTTPException(status_code=401, detail=str(exc)) from exc
+            metadata.update(publisher_registry.publisher_metadata(publisher))
+            if not metadata.get("homepage"):
+                metadata["homepage"] = publisher.get("homepage")
         try:
             return store.publish_text(
                 payload.yaml,
                 source_file=payload.source_file,
-                metadata={
-                    "publisher": payload.publisher,
-                    "topics": payload.topics,
-                    "homepage": payload.homepage,
-                },
+                metadata=metadata,
             )
         except (FileNotFoundError, ValueError) as exc:
             raise HTTPException(status_code=400, detail=str(exc)) from exc

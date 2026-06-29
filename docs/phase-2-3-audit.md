@@ -9,6 +9,7 @@ This audit separates local repo-complete items from still-pending hosted or comm
 - checkpoint/resume
 - local registry `publish/install/list/search/inspect`
 - hosted CairnHub file-backed API `publish/list/search/inspect/source`
+- verified publisher registry + API-key publish auth
 - retry guards
 - circuit breaker foundation
 - parallel fan-out execution
@@ -20,7 +21,6 @@ This audit separates local repo-complete items from still-pending hosted or comm
 
 ## Still Pending
 
-- verified publishers
 - ratings
 - shared multi-node remote search/index
 - rich hosted CairnLens observability UI
