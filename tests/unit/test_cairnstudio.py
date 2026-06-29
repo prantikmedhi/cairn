@@ -2,7 +2,11 @@ import sys
 import types
 
 from cairnstudio.app import (
+    add_comment,
     canvas_model_to_yaml,
+    heartbeat_presence,
+    load_activity,
+    load_presence,
     load_session,
     preview_yaml_text,
     render_index_html,
@@ -95,3 +99,23 @@ def test_session_save_and_load(tmp_path, monkeypatch) -> None:
     assert saved["version"] == 1
     assert loaded["session_id"] == "team-room"
     assert loaded["yaml"] == studio_app.STARTER_LOOP
+
+
+def test_presence_comments_and_activity(tmp_path, monkeypatch) -> None:
+    from cairnstudio import app as studio_app
+
+    monkeypatch.setattr(studio_app, "SESSION_DIR", tmp_path / "sessions")
+    model = yaml_to_canvas_model(studio_app.STARTER_LOOP)
+    save_session("room-one", studio_app.STARTER_LOOP, model, actor_id="alpha", actor_name="Alpha")
+
+    presence = heartbeat_presence("room-one", "alpha", "Alpha")
+    comment = add_comment("room-one", "alpha", "Alpha", "Need review on finish state")
+    loaded_presence = load_presence("room-one")
+    activity = load_activity("room-one")
+
+    assert presence["count"] == 1
+    assert loaded_presence["presence"][0]["actor_name"] == "Alpha"
+    assert comment["comment"]["message"] == "Need review on finish state"
+    assert any(item["kind"] == "save" for item in activity["activity"])
+    assert any(item["kind"] == "comment" for item in activity["activity"])
+    assert activity["comments"][0]["message"] == "Need review on finish state"

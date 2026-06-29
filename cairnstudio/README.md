@@ -1,6 +1,6 @@
 # CairnStudio
 
-CairnStudio beta is now available as a local Jinja-backed visual editor for non-developers.
+CairnStudio beta is now available as a hosted-ready Jinja-backed visual editor for non-developers.
 
 Current beta scope:
 
@@ -9,7 +9,10 @@ Current beta scope:
 - real-time validation
 - live execution preview
 - trace replay visualization
-- local shared-session collaboration
+- shared-session collaboration
+- live presence heartbeat
+- shared comments and activity feed
+- hosted shareable session URLs
 
 Run:
 
@@ -25,5 +28,4 @@ http://127.0.0.1:8787
 
 Still pending:
 
-- rich multi-user presence
-- hosted visual backend
+- conflict-free merge beyond last-write-wins

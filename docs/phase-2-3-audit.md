@@ -11,10 +11,12 @@ This audit separates local repo-complete items from still-pending hosted or comm
 - hosted CairnHub file-backed API `publish/list/search/inspect/source`
 - verified publisher registry + API-key publish auth
 - hosted loop ratings + per-version summaries
+- shared remote index export/import + federated search
 - retry guards
 - circuit breaker foundation
 - parallel fan-out execution
 - trace export
+- hosted trace ingest + CairnLens UI
 - `debug`, `cost`, `test`, `watch`
 - self-hosting docs
 - plugin SDK notes
@@ -22,6 +24,4 @@ This audit separates local repo-complete items from still-pending hosted or comm
 
 ## Still Pending
 
-- shared multi-node remote search/index
-- rich hosted CairnLens observability UI
 - community/adoption milestones from PRD

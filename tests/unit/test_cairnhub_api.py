@@ -186,3 +186,83 @@ def test_cairnhub_ratings_summary_and_filtering(tmp_path) -> None:
         json={"score": 0, "reviewer": "eve"},
     )
     assert rejected.status_code == 422
+
+
+def test_cairnhub_remote_index_import_and_search(tmp_path) -> None:
+    primary = TestClient(create_app(registry_path=tmp_path / "primary"))
+    peer = TestClient(create_app(registry_path=tmp_path / "peer"))
+
+    published = peer.post(
+        "/api/v1/loops",
+        json={
+            "yaml": SAMPLE_LOOP.replace("hosted-hello", "peer-loop"),
+            "source_file": "peer-loop.crn",
+            "publisher": "Peer Labs",
+            "topics": ["shared", "remote"],
+        },
+    )
+    assert published.status_code == 201
+
+    snapshot = peer.get("/api/v1/index/export")
+    assert snapshot.status_code == 200
+
+    imported = primary.post(
+        "/api/v1/index/import",
+        json={"peer_id": "peer-east", "peer_label": "Peer East", "snapshot": snapshot.json()},
+    )
+    assert imported.status_code == 201
+    assert imported.json()["loops_indexed"] == 1
+
+    peers = primary.get("/api/v1/index/peers")
+    assert peers.status_code == 200
+    assert peers.json()["count"] == 1
+
+    remote_search = primary.get("/api/v1/loops", params={"q": "remote", "include_remote": "true"})
+    assert remote_search.status_code == 200
+    assert remote_search.json()["loops"][0]["source_kind"] == "remote"
+    assert remote_search.json()["loops"][0]["peer_id"] == "peer-east"
+
+    inspected = primary.get("/api/v1/remote/loops/peer-east/peer-loop")
+    assert inspected.status_code == 200
+    assert inspected.json()["version"] == "0.2.0"
+
+    remote_source = primary.get("/api/v1/remote/loops/peer-east/peer-loop/versions/0.2.0/source")
+    assert remote_source.status_code == 200
+    assert "hello hub" in remote_source.text
+
+
+def test_cairnhub_traces_and_lens_ui(tmp_path) -> None:
+    client = TestClient(create_app(registry_path=tmp_path / "hub"))
+
+    trace = client.post(
+        "/api/v1/traces",
+        json={
+            "loop_id": "hello-world",
+            "success": True,
+            "final_outputs": {"greeting": "hello"},
+            "state_results": [{"state_id": "finish", "outputs": {"greeting": "hello"}, "skipped": False}],
+            "metadata": {"target": "langchain", "duration_ms": 18.5, "cost_usd": 0.02, "retry_events": 0},
+            "source": "cli",
+            "tags": ["smoke"],
+        },
+    )
+    assert trace.status_code == 201
+    trace_id = trace.json()["trace_id"]
+
+    traces = client.get("/api/v1/traces")
+    assert traces.status_code == 200
+    assert traces.json()["count"] == 1
+
+    summary = client.get("/api/v1/lens/summary")
+    assert summary.status_code == 200
+    assert summary.json()["total_traces"] == 1
+    assert summary.json()["success_rate"] == 100.0
+
+    fetched = client.get(f"/api/v1/traces/{trace_id}")
+    assert fetched.status_code == 200
+    assert fetched.json()["source"] == "cli"
+
+    lens = client.get("/lens")
+    assert lens.status_code == 200
+    assert "CairnLens" in lens.text
+    assert "hello-world" in lens.text

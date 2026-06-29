@@ -52,6 +52,33 @@ def test_run_command_can_write_trace_and_checkpoint(tmp_path: Path) -> None:
     assert '"paused": true' in trace_file.read_text()
 
 
+def test_run_command_can_publish_trace_endpoint(tmp_path: Path, monkeypatch) -> None:
+    from cairn import main as main_module
+
+    published = {}
+
+    def fake_publish(endpoint: str, payload: dict[str, object]) -> dict[str, object]:
+        published["endpoint"] = endpoint
+        published["payload"] = payload
+        return {"trace_id": "trace-123"}
+
+    monkeypatch.setattr(main_module, "_publish_trace_payload", fake_publish)
+
+    result = runner.invoke(
+        app,
+        [
+            "run",
+            "cairnlang/examples/hello-world.crn",
+            "--trace-endpoint",
+            "http://localhost:8790/api/v1/traces",
+        ],
+    )
+
+    assert result.exit_code == 0
+    assert published["endpoint"] == "http://localhost:8790/api/v1/traces"
+    assert published["payload"]["loop_id"] == "hello-world"
+
+
 def test_publish_install_list_and_registry_inspect_commands(tmp_path: Path) -> None:
     registry = tmp_path / "registry"
     install_dir = tmp_path / "installed"

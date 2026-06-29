@@ -1,0 +1,150 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{{ page_title }} — Hosted Observability for Agent Loop Engineering</title>
+    <style>
+      :root {
+        --bg: #0f172a;
+        --panel: #111c34;
+        --panel-2: #152341;
+        --ink: #f8fafc;
+        --muted: #94a3b8;
+        --line: rgba(148, 163, 184, 0.2);
+        --accent: #22c55e;
+        --accent-2: #38bdf8;
+        --danger: #f97316;
+      }
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        color: var(--ink);
+        background:
+          radial-gradient(circle at top right, rgba(56,189,248,0.18), transparent 28%),
+          radial-gradient(circle at top left, rgba(34,197,94,0.14), transparent 22%),
+          var(--bg);
+        font-family: "Fira Sans", sans-serif;
+      }
+      .shell { max-width: 1440px; margin: 0 auto; padding: 28px; display: grid; gap: 20px; }
+      .hero, .panel { background: var(--panel); border: 1px solid var(--line); border-radius: 24px; }
+      .hero { padding: 28px; display: grid; gap: 18px; }
+      .eyebrow {
+        display: inline-flex; width: fit-content; padding: 8px 12px; border-radius: 999px;
+        background: rgba(34,197,94,0.14); color: var(--accent); font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; font-size: 12px;
+      }
+      h1, h2, h3 { margin: 0; font-family: "Fira Code", monospace; }
+      p { margin: 0; color: var(--muted); line-height: 1.6; }
+      .stats { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 14px; }
+      .stat { background: var(--panel-2); border-radius: 20px; padding: 18px; border: 1px solid rgba(56,189,248,0.12); }
+      .stat-label { color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; font-size: 12px; font-weight: 700; }
+      .stat-value { font-size: 32px; font-weight: 700; margin-top: 10px; }
+      .grid { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(320px, 0.8fr); gap: 20px; }
+      .panel { padding: 22px; }
+      .trace-list, .peer-list { display: grid; gap: 12px; margin-top: 16px; }
+      .trace-card, .peer-card {
+        border-radius: 18px; padding: 16px; background: rgba(15,23,42,0.72);
+        border: 1px solid var(--line);
+      }
+      .trace-top, .peer-top { display: flex; justify-content: space-between; gap: 12px; align-items: center; }
+      .trace-meta, .peer-meta, .mini { color: var(--muted); font-size: 13px; }
+      .chip {
+        display: inline-flex; padding: 6px 10px; border-radius: 999px; font-size: 12px; font-weight: 700;
+        background: rgba(56,189,248,0.12); color: var(--accent-2);
+      }
+      .chip.fail { background: rgba(249,115,22,0.14); color: #fdba74; }
+      .bars { display: grid; gap: 10px; margin-top: 16px; }
+      .bar-row { display: grid; gap: 6px; }
+      .bar-track { height: 12px; border-radius: 999px; background: rgba(148,163,184,0.12); overflow: hidden; }
+      .bar-fill { height: 100%; background: linear-gradient(90deg, var(--accent), var(--accent-2)); }
+      code { font-family: "Fira Code", monospace; color: #e2e8f0; }
+      @media (max-width: 1180px) {
+        .stats { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+        .grid { grid-template-columns: 1fr; }
+      }
+      @media (max-width: 700px) {
+        .shell { padding: 16px; }
+        .stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      }
+    </style>
+  </head>
+  <body>
+    <main class="shell">
+      <section class="hero">
+        <span class="eyebrow">Hosted CairnLens</span>
+        <div>
+          <h1>{{ page_title }}</h1>
+          <p>Central trace store, live success/failure view, loop hot spots, remote registry coverage.</p>
+        </div>
+        <div class="stats">
+          <article class="stat"><div class="stat-label">Total traces</div><div class="stat-value">{{ summary.total_traces }}</div></article>
+          <article class="stat"><div class="stat-label">Success rate</div><div class="stat-value">{{ summary.success_rate }}%</div></article>
+          <article class="stat"><div class="stat-label">Avg duration</div><div class="stat-value">{{ summary.average_duration_ms }}</div></article>
+          <article class="stat"><div class="stat-label">Avg cost</div><div class="stat-value">{{ summary.average_cost_usd }}</div></article>
+          <article class="stat"><div class="stat-label">Peer indexes</div><div class="stat-value">{{ summary.peer_indexes }}</div></article>
+          <article class="stat"><div class="stat-label">Remote loops</div><div class="stat-value">{{ summary.remote_loops }}</div></article>
+        </div>
+      </section>
+
+      <section class="grid">
+        <article class="panel">
+          <h2>Recent traces</h2>
+          <p>Last {{ traces|length }} execution traces sent to hosted observability store.</p>
+          <div class="trace-list">
+            {% for trace in traces %}
+            <div class="trace-card">
+              <div class="trace-top">
+                <div>
+                  <h3>{{ trace.loop_id }}</h3>
+                  <div class="trace-meta"><code>{{ trace.trace_id }}</code></div>
+                </div>
+                <span class="chip{% if not trace.success %} fail{% endif %}">{{ "success" if trace.success else "failure" }}</span>
+              </div>
+              <p class="mini">Target {{ trace.metadata.target or "unknown" }} · {{ trace.metadata.duration_ms or 0 }} ms · retries {{ trace.metadata.retry_events or 0 }}</p>
+              {% if trace.error %}
+              <p class="mini">Error: {{ trace.error }}</p>
+              {% endif %}
+            </div>
+            {% else %}
+            <div class="trace-card"><p>No traces yet. POST to <code>/api/v1/traces</code>.</p></div>
+            {% endfor %}
+          </div>
+        </article>
+
+        <div style="display:grid; gap:20px;">
+          <article class="panel">
+            <h2>Top loops</h2>
+            <div class="bars">
+              {% for loop_id, count in summary.top_loops %}
+              <div class="bar-row">
+                <div class="trace-top"><strong>{{ loop_id }}</strong><span class="mini">{{ count }}</span></div>
+                <div class="bar-track"><div class="bar-fill" style="width: {{ (count / summary.total_traces * 100) if summary.total_traces else 0 }}%"></div></div>
+              </div>
+              {% else %}
+              <p>No loop volume yet.</p>
+              {% endfor %}
+            </div>
+          </article>
+
+          <article class="panel">
+            <h2>Peer registries</h2>
+            <p>Imported remote snapshots for shared search/index.</p>
+            <div class="peer-list">
+              {% for peer in peers %}
+              <div class="peer-card">
+                <div class="peer-top">
+                  <strong>{{ peer.peer_label }}</strong>
+                  <span class="chip">{{ peer.loops_indexed }} loops</span>
+                </div>
+                <div class="peer-meta"><code>{{ peer.peer_id }}</code></div>
+              </div>
+              {% else %}
+              <div class="peer-card"><p>No peers imported yet. Use <code>/api/v1/index/import</code>.</p></div>
+              {% endfor %}
+            </div>
+          </article>
+        </div>
+      </section>
+    </main>
+  </body>
+</html>

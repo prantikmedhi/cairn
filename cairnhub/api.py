@@ -5,7 +5,7 @@ from pathlib import Path
 from typing import Any
 
 from fastapi import FastAPI, Header, HTTPException
-from fastapi.responses import PlainTextResponse
+from fastapi.responses import HTMLResponse, PlainTextResponse
 from pydantic import BaseModel, Field
 
 from cairnhub.publishers import PublisherRegistry
@@ -14,6 +14,8 @@ from cairnhub.store import FileRegistryStore
 
 DEFAULT_REGISTRY_PATH = ".cairnhub-hosted"
 DEFAULT_PUBLISHERS_PATH = ".cairnhub-publishers.json"
+ROOT = Path(__file__).resolve().parent
+TEMPLATE_DIR = ROOT / "templates"
 
 
 class PublishLoopRequest(BaseModel):
@@ -29,6 +31,24 @@ class RateLoopRequest(BaseModel):
     score: int = Field(..., ge=1, le=5, description="Integer rating from 1 to 5")
     reviewer: str = Field(..., min_length=1, description="Reviewer name or handle")
     comment: str | None = Field(default=None, description="Optional short review text")
+
+
+class ImportPeerIndexRequest(BaseModel):
+    peer_id: str = Field(..., min_length=1, description="Stable remote registry identifier")
+    peer_label: str | None = Field(default=None, description="Human-readable registry label")
+    snapshot: dict[str, Any] = Field(..., description="Snapshot exported from /api/v1/index/export")
+
+
+class PublishTraceRequest(BaseModel):
+    trace_id: str | None = Field(default=None, description="Optional trace id override")
+    loop_id: str = Field(..., min_length=1, description="Loop id for trace")
+    success: bool = Field(..., description="Trace success flag")
+    final_outputs: dict[str, Any] = Field(default_factory=dict)
+    state_results: list[dict[str, Any]] = Field(default_factory=list)
+    error: str | None = Field(default=None)
+    metadata: dict[str, Any] = Field(default_factory=dict)
+    source: str | None = Field(default=None)
+    tags: list[str] = Field(default_factory=list)
 
 
 def create_app(
@@ -52,6 +72,8 @@ def create_app(
             "registry_path": str(store.registry_root.resolve()),
             "auth_enabled": publisher_registry.enabled(),
             "publishers_count": publisher_registry.count(),
+            "peer_indexes": len(store.list_peer_indexes()),
+            "trace_count": len(store.list_traces(limit=500)),
         }
 
     @app.get("/api/v1/publishers")
@@ -64,14 +86,45 @@ def create_app(
         limit: int = 50,
         verified_only: bool = False,
         min_rating: float | None = None,
+        include_remote: bool = False,
     ) -> dict[str, object]:
-        results = store.search_loops(q or "") if q is not None else store.list_loops()
+        results = store.search_loops(q or "", include_remote=include_remote) if q is not None else store.list_loops(include_remote=include_remote)
         if verified_only:
             results = [item for item in results if item.get("publisher_verified") is True]
         if min_rating is not None:
             results = [item for item in results if (item.get("average_score") or 0) >= min_rating]
         safe_limit = max(1, min(limit, 200))
         return {"loops": results[:safe_limit], "count": len(results[:safe_limit]), "total": len(results)}
+
+    @app.get("/api/v1/index/export")
+    def export_index() -> dict[str, Any]:
+        return store.export_index_snapshot()
+
+    @app.post("/api/v1/index/import", status_code=201)
+    def import_index(payload: ImportPeerIndexRequest) -> dict[str, Any]:
+        try:
+            return store.import_index_snapshot(payload.peer_id, payload.snapshot, peer_label=payload.peer_label)
+        except ValueError as exc:
+            raise HTTPException(status_code=400, detail=str(exc)) from exc
+
+    @app.get("/api/v1/index/peers")
+    def list_index_peers() -> dict[str, Any]:
+        peers = store.list_peer_indexes()
+        return {"peers": peers, "count": len(peers)}
+
+    @app.get("/api/v1/remote/loops/{peer_id}/{loop_id}")
+    def inspect_remote_loop(peer_id: str, loop_id: str, version: str | None = None) -> dict[str, Any]:
+        try:
+            return store.inspect_remote_loop(peer_id, loop_id, version)
+        except FileNotFoundError as exc:
+            raise HTTPException(status_code=404, detail=str(exc)) from exc
+
+    @app.get("/api/v1/remote/loops/{peer_id}/{loop_id}/versions/{version}/source", response_class=PlainTextResponse)
+    def fetch_remote_loop_source(peer_id: str, loop_id: str, version: str) -> str:
+        try:
+            return store.load_remote_source_text(peer_id, loop_id, version)
+        except FileNotFoundError as exc:
+            raise HTTPException(status_code=404, detail=str(exc)) from exc
 
     @app.post("/api/v1/loops", status_code=201)
     def publish_registry_loop(payload: PublishLoopRequest, x_api_key: str | None = Header(default=None)) -> dict[str, Any]:
@@ -146,6 +199,41 @@ def create_app(
         except ValueError as exc:
             raise HTTPException(status_code=400, detail=str(exc)) from exc
 
+    @app.post("/api/v1/traces", status_code=201)
+    def publish_trace(payload: PublishTraceRequest) -> dict[str, Any]:
+        try:
+            return store.publish_trace(payload.model_dump())
+        except ValueError as exc:
+            raise HTTPException(status_code=400, detail=str(exc)) from exc
+
+    @app.get("/api/v1/traces")
+    def list_traces(
+        limit: int = 50,
+        loop_id: str | None = None,
+        success: bool | None = None,
+    ) -> dict[str, Any]:
+        traces = store.list_traces(limit=max(1, min(limit, 200)), loop_id=loop_id, success=success)
+        return {"traces": traces, "count": len(traces)}
+
+    @app.get("/api/v1/traces/{trace_id}")
+    def inspect_trace(trace_id: str) -> dict[str, Any]:
+        try:
+            return store.get_trace(trace_id)
+        except FileNotFoundError as exc:
+            raise HTTPException(status_code=404, detail=str(exc)) from exc
+
+    @app.get("/api/v1/lens/summary")
+    def lens_summary() -> dict[str, Any]:
+        return store.lens_summary()
+
+    @app.get("/lens", response_class=HTMLResponse)
+    def lens_ui() -> str:
+        return render_lens_html(
+            summary=store.lens_summary(),
+            traces=store.list_traces(limit=12),
+            peers=store.list_peer_indexes(),
+        )
+
     return app
 
 
@@ -156,3 +244,26 @@ def run_server(host: str = "127.0.0.1", port: int = 8790, registry_path: str | P
     import uvicorn
 
     uvicorn.run(create_app(registry_path=registry_path), host=host, port=port, reload=False)
+
+
+def render_lens_html(summary: dict[str, Any], traces: list[dict[str, Any]], peers: list[dict[str, Any]]) -> str:
+    try:
+        from jinja2 import Environment, FileSystemLoader, select_autoescape
+    except ImportError as exc:  # pragma: no cover
+        raise RuntimeError("CairnLens requires Jinja2. Install project dependencies first.") from exc
+
+    environment = Environment(
+        loader=FileSystemLoader(str(TEMPLATE_DIR)),
+        autoescape=select_autoescape(["html", "xml"]),
+        trim_blocks=True,
+        lstrip_blocks=True,
+    )
+    template = environment.get_template("lens.html.j2")
+    return template.render(
+        {
+            "page_title": "CairnLens",
+            "summary": summary,
+            "traces": traces,
+            "peers": peers,
+        }
+    )

@@ -10,6 +10,9 @@ Current scope:
 - list, search, inspect, and fetch published manifests/source
 - verified publisher registry and API-key gated publishing
 - per-version loop ratings and review summaries
+- remote peer index export/import for shared search
+- remote source/version resolution from imported peer registries
+- hosted CairnLens traces and observability UI
 - FastAPI app for self-hosted CairnHub foundation
 
 Run hosted API:
@@ -17,6 +20,12 @@ Run hosted API:
 ```bash
 pip install -e ".[hub]"
 uvicorn cairnhub.api:app --host 127.0.0.1 --port 8790
+```
+
+Open hosted observability UI:
+
+```text
+http://127.0.0.1:8790/lens
 ```
 
 Optional verified publishers file:
@@ -39,5 +48,4 @@ Set path with `CAIRN_HUB_PUBLISHERS_PATH=/path/to/publishers.json`.
 
 Still not built:
 
-- shared multi-node search/index
-- version resolution across remote registry peers
+- direct peer-to-peer authenticated install without snapshot exchange

@@ -19,6 +19,7 @@ from cairnforge.validator import CairnValidationError, validate_loop_definition
 ROOT = Path(__file__).resolve().parent
 TEMPLATE_DIR = ROOT / "templates"
 SESSION_DIR = ROOT / "sessions"
+PRESENCE_TTL_SECONDS = 15
 STARTER_LOOP = """cairn: "1.0"
 
 loop:
@@ -56,7 +57,7 @@ def render_index_html() -> str:
         "starter_yaml": STARTER_LOOP,
         "available_targets": ["langchain", "langgraph", "crewai", "autogen", "openai"],
         "phase_badge": "Phase 4 Beta",
-        "collaboration_status": "Local collaboration enabled: shared session sync with last-write-wins",
+        "collaboration_status": "Hosted collaboration ready: live presence, comments, activity feed, and shared session sync",
         "default_session_id": "default",
     }
     try:
@@ -205,7 +206,14 @@ def load_session(session_id: str) -> dict[str, Any]:
     return json.loads(session_path.read_text(encoding="utf-8"))
 
 
-def save_session(session_id: str, yaml_text: str, model: dict[str, Any], client_version: int | None = None) -> dict[str, Any]:
+def save_session(
+    session_id: str,
+    yaml_text: str,
+    model: dict[str, Any],
+    client_version: int | None = None,
+    actor_id: str | None = None,
+    actor_name: str | None = None,
+) -> dict[str, Any]:
     session_path = _session_path(session_id)
     current = load_session(session_id)
     current_version = int(current.get("version", 0))
@@ -221,12 +229,143 @@ def save_session(session_id: str, yaml_text: str, model: dict[str, Any], client_
     }
     session_path.parent.mkdir(parents=True, exist_ok=True)
     session_path.write_text(json.dumps(payload, indent=2), encoding="utf-8")
+    if actor_id or actor_name:
+        _append_activity(
+            session_id,
+            {
+                "kind": "save",
+                "actor_id": actor_id or "unknown",
+                "actor_name": actor_name or actor_id or "unknown",
+                "message": "saved shared session",
+                "at": datetime.now(timezone.utc).isoformat(),
+            },
+        )
     return payload
+
+
+def heartbeat_presence(session_id: str, actor_id: str, actor_name: str) -> dict[str, Any]:
+    if not actor_id.strip():
+        raise ValueError("actor_id required")
+    if not actor_name.strip():
+        raise ValueError("actor_name required")
+
+    metadata = _load_session_meta(session_id)
+    now = datetime.now(timezone.utc)
+    active_presence = []
+    seen = False
+    for item in metadata.get("presence", []):
+        last_seen_text = item.get("last_seen")
+        if not last_seen_text:
+            continue
+        last_seen = datetime.fromisoformat(last_seen_text)
+        if (now - last_seen).total_seconds() > PRESENCE_TTL_SECONDS:
+            continue
+        if item.get("actor_id") == actor_id:
+            item = {
+                "actor_id": actor_id,
+                "actor_name": actor_name,
+                "last_seen": now.isoformat(),
+            }
+            seen = True
+        active_presence.append(item)
+    if not seen:
+        active_presence.append({"actor_id": actor_id, "actor_name": actor_name, "last_seen": now.isoformat()})
+    metadata["presence"] = active_presence
+    if not seen:
+        activity = list(metadata.get("activity", []))
+        activity.append(
+            {
+                "kind": "join",
+                "actor_id": actor_id,
+                "actor_name": actor_name,
+                "message": "joined shared room",
+                "at": now.isoformat(),
+            }
+        )
+        metadata["activity"] = activity[-50:]
+    _write_session_meta(session_id, metadata)
+    return {"session_id": session_id, "presence": active_presence, "count": len(active_presence)}
+
+
+def load_presence(session_id: str) -> dict[str, Any]:
+    metadata = _load_session_meta(session_id)
+    now = datetime.now(timezone.utc)
+    active_presence = [
+        item
+        for item in metadata.get("presence", [])
+        if item.get("last_seen") and (now - datetime.fromisoformat(item["last_seen"])).total_seconds() <= PRESENCE_TTL_SECONDS
+    ]
+    metadata["presence"] = active_presence
+    _write_session_meta(session_id, metadata)
+    return {"session_id": session_id, "presence": active_presence, "count": len(active_presence)}
+
+
+def add_comment(session_id: str, actor_id: str, actor_name: str, message: str) -> dict[str, Any]:
+    comment_text = message.strip()
+    if not comment_text:
+        raise ValueError("comment message required")
+    metadata = _load_session_meta(session_id)
+    comment = {
+        "actor_id": actor_id or "unknown",
+        "actor_name": actor_name or actor_id or "unknown",
+        "message": comment_text,
+        "at": datetime.now(timezone.utc).isoformat(),
+    }
+    comments = list(metadata.get("comments", []))
+    comments.append(comment)
+    metadata["comments"] = comments[-50:]
+    _write_session_meta(session_id, metadata)
+    _append_activity(
+        session_id,
+        {
+            "kind": "comment",
+            "actor_id": comment["actor_id"],
+            "actor_name": comment["actor_name"],
+            "message": comment["message"],
+            "at": comment["at"],
+        },
+    )
+    return {"session_id": session_id, "comment": comment}
+
+
+def load_activity(session_id: str) -> dict[str, Any]:
+    metadata = _load_session_meta(session_id)
+    return {
+        "session_id": session_id,
+        "comments": list(metadata.get("comments", []))[-20:],
+        "activity": list(metadata.get("activity", []))[-30:],
+    }
 
 
 def _session_path(session_id: str) -> Path:
     safe = "".join(character if character.isalnum() or character in {"-", "_"} else "-" for character in session_id) or "default"
     return SESSION_DIR / f"{safe}.json"
+
+
+def _session_meta_path(session_id: str) -> Path:
+    safe = "".join(character if character.isalnum() or character in {"-", "_"} else "-" for character in session_id) or "default"
+    return SESSION_DIR / "_meta" / f"{safe}.json"
+
+
+def _load_session_meta(session_id: str) -> dict[str, Any]:
+    path = _session_meta_path(session_id)
+    if not path.exists():
+        return {"session_id": session_id, "presence": [], "comments": [], "activity": []}
+    return json.loads(path.read_text(encoding="utf-8"))
+
+
+def _write_session_meta(session_id: str, metadata: dict[str, Any]) -> None:
+    path = _session_meta_path(session_id)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(json.dumps(metadata, indent=2), encoding="utf-8")
+
+
+def _append_activity(session_id: str, event: dict[str, Any]) -> None:
+    metadata = _load_session_meta(session_id)
+    activity = list(metadata.get("activity", []))
+    activity.append(event)
+    metadata["activity"] = activity[-50:]
+    _write_session_meta(session_id, metadata)
 
 
 class CairnStudioHandler(BaseHTTPRequestHandler):
@@ -241,6 +380,16 @@ class CairnStudioHandler(BaseHTTPRequestHandler):
             query = parse_qs(parsed.query)
             session_id = query.get("id", ["default"])[0]
             self._send_json(load_session(session_id))
+            return
+        if parsed.path == "/api/session/presence":
+            query = parse_qs(parsed.query)
+            session_id = query.get("id", ["default"])[0]
+            self._send_json(load_presence(session_id))
+            return
+        if parsed.path == "/api/session/activity":
+            query = parse_qs(parsed.query)
+            session_id = query.get("id", ["default"])[0]
+            self._send_json(load_activity(session_id))
             return
         self.send_error(HTTPStatus.NOT_FOUND, "Not Found")
 
@@ -270,7 +419,35 @@ class CairnStudioHandler(BaseHTTPRequestHandler):
                 session_id = payload.get("session_id", "default")
                 yaml_text = payload.get("yaml", STARTER_LOOP)
                 model = payload.get("model") or yaml_to_canvas_model(yaml_text)
-                self._send_json(save_session(session_id, yaml_text, model, client_version=payload.get("version")))
+                self._send_json(
+                    save_session(
+                        session_id,
+                        yaml_text,
+                        model,
+                        client_version=payload.get("version"),
+                        actor_id=payload.get("actor_id"),
+                        actor_name=payload.get("actor_name"),
+                    )
+                )
+                return
+            if parsed.path == "/api/session/presence":
+                self._send_json(
+                    heartbeat_presence(
+                        payload.get("session_id", "default"),
+                        payload.get("actor_id", ""),
+                        payload.get("actor_name", ""),
+                    )
+                )
+                return
+            if parsed.path == "/api/session/comment":
+                self._send_json(
+                    add_comment(
+                        payload.get("session_id", "default"),
+                        payload.get("actor_id", ""),
+                        payload.get("actor_name", ""),
+                        payload.get("message", ""),
+                    )
+                )
                 return
         except (ValueError, CairnValidationError, RuntimeError) as exc:
             self._send_json({"error": str(exc)}, status=HTTPStatus.BAD_REQUEST)

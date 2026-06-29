@@ -8,6 +8,7 @@ from pathlib import Path
 import typer
 from rich.console import Console
 
+from cairnhub.api import run_server as run_hub_server
 from cairnhub.local_registry import inspect_loop, install_loop, list_loops, publish_loop, search_loops
 from cairnstudio.app import run_server as run_studio_server
 from cairnforge.compiler import compile_loop
@@ -59,6 +60,17 @@ def _result_payload(result) -> dict[str, object]:
     }
 
 
+def _publish_trace_payload(endpoint: str, payload: dict[str, object]) -> dict[str, object]:
+    try:
+        import httpx
+    except ImportError as exc:  # pragma: no cover - runtime guidance
+        raise RuntimeError("Trace publishing requires httpx. Install with `pip install -e \".[hub]\"`.") from exc
+
+    response = httpx.post(endpoint, json=payload, timeout=10.0)
+    response.raise_for_status()
+    return response.json()
+
+
 def _load_inputs(items: list[str] | None, inputs_file: Path | None) -> dict[str, object]:
     provided_inputs = _parse_key_values(items or [])
     if inputs_file is not None:
@@ -89,6 +101,7 @@ def run(
     resume: Path | None = typer.Option(None, "--resume", help="Resume execution from checkpoint JSON file"),
     max_steps: int | None = typer.Option(None, "--max-steps", help="Pause after N executed states"),
     trace_file: Path | None = typer.Option(None, "--trace-file", help="Write execution trace JSON file"),
+    trace_endpoint: str | None = typer.Option(None, "--trace-endpoint", help="Publish execution trace JSON to hosted CairnLens endpoint"),
 ) -> None:
     """Execute loop and print result JSON."""
 
@@ -108,6 +121,9 @@ def run(
     if trace_file is not None:
         trace_file.parent.mkdir(parents=True, exist_ok=True)
         trace_file.write_text(json.dumps(payload, indent=2), encoding="utf-8")
+    if trace_endpoint is not None:
+        published = _publish_trace_payload(trace_endpoint, payload)
+        console.print_json(data={"trace_published": True, "trace_id": published.get("trace_id"), "endpoint": trace_endpoint})
     if not result.success and not result.metadata.get("paused"):
         raise typer.Exit(code=1)
 
@@ -341,6 +357,17 @@ def studio(
     """Launch CairnStudio beta visual editor."""
 
     run_studio_server(host=host, port=port)
+
+
+@app.command()
+def hub(
+    host: str = typer.Option("127.0.0.1", "--host", help="Hub bind host"),
+    port: int = typer.Option(8790, "--port", help="Hub bind port"),
+    registry: Path = typer.Option(Path(".cairnhub-hosted"), "--registry", help="Hosted registry path"),
+) -> None:
+    """Launch hosted CairnHub API with Lens and federated index endpoints."""
+
+    run_hub_server(host=host, port=port, registry_path=registry)
 
 
 if __name__ == "__main__":

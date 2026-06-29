@@ -1,6 +1,6 @@
 # Cairn CLI Reference — Agent Loop Engineering Commands
 
-Complete reference for all 17 Cairn CLI commands used in agent loop engineering: validating, running, debugging, tracing, publishing, and inspecting agent loops.
+Complete reference for all 18 Cairn CLI commands used in agent loop engineering: validating, running, debugging, tracing, publishing, inspecting, and launching hosted registry services.
 
 - `init`
 - `validate`
@@ -17,6 +17,7 @@ Complete reference for all 17 Cairn CLI commands used in agent loop engineering:
 - `test`
 - `watch`
 - `studio`
+- `hub`
 
 ## Examples
 
@@ -29,5 +30,7 @@ python3 -m cairn.main search hello --registry .cairnhub
 python3 -m cairn.main debug cairnlang/examples/retry-recovery.crn
 python3 -m cairn.main cost cairnlang/examples/parallel-fanout.crn
 python3 -m cairn.main watch cairnlang/examples/hello-world.crn --cycles 2
+python3 -m cairn.main run cairnlang/examples/hello-world.crn --trace-endpoint http://127.0.0.1:8790/api/v1/traces
 python3 -m cairn.main studio --port 8787
+python3 -m cairn.main hub --port 8790
 ```

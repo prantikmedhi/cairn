@@ -105,6 +105,24 @@
         gap: 12px;
         margin-top: 22px;
       }
+      .collab-pane {
+        display: grid;
+        gap: 12px;
+        margin-top: 22px;
+        padding-top: 18px;
+        border-top: 1px solid var(--line);
+      }
+      .collab-list, .activity-list {
+        display: grid;
+        gap: 8px;
+      }
+      .collab-card, .activity-card {
+        padding: 12px 14px;
+        border-radius: 16px;
+        background: #fff;
+        border: 1px solid rgba(24,24,27,0.08);
+      }
+      .activity-card p, .collab-card p { margin: 6px 0 0; }
       .palette-card {
         cursor: pointer;
         border: 1px solid var(--line);
@@ -233,6 +251,7 @@
         border-color: var(--accent);
       }
       textarea { min-height: 220px; resize: vertical; }
+      #commentInput { min-height: 110px; }
       .stack { display: grid; gap: 12px; }
       .label { font-size: 13px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; }
       .trace-step {
@@ -286,6 +305,16 @@
           <button class="palette-card ghost" draggable="true" data-kind="state" data-handler="core.condition">Condition state</button>
           <button class="palette-card ghost" draggable="true" data-kind="subloop" data-handler="">Sub-loop state</button>
         </div>
+        <div class="collab-pane">
+          <div class="label">Collaboration</div>
+          <input id="collaboratorName" aria-label="Collaborator name" placeholder="Your name">
+          <input id="shareSession" aria-label="Share session link" readonly>
+          <div id="presenceList" class="collab-list">
+            <div class="status">No collaborators active yet.</div>
+          </div>
+          <textarea id="commentInput" aria-label="Comment message" placeholder="Leave handoff note or review comment"></textarea>
+          <button class="accent" id="sendComment">Send comment</button>
+        </div>
       </aside>
 
       <section class="panel workspace">
@@ -330,8 +359,7 @@
         </div>
 
         <div class="footer-note">
-          Visual beta covers drag/drop, live validation, live preview, trace replay, import/export.
-          Collaborative editing remains pending.
+          Hosted visual flow now covers drag/drop, live validation, live preview, trace replay, shared session sync, live presence, comments, and activity feed.
         </div>
       </section>
 
@@ -340,6 +368,12 @@
         <p>Select node to edit labels, handler, loop reference, inputs, transitions, guards, and parallel branches.</p>
         <div class="stack" id="inspectorFields">
           <div class="status">No node selected yet.</div>
+        </div>
+        <div class="stack" style="margin-top:20px;">
+          <div class="label">Room Activity</div>
+          <div id="activityList" class="activity-list">
+            <div class="status">Waiting for collaboration events.</div>
+          </div>
         </div>
       </aside>
     </main>
@@ -352,7 +386,13 @@
       const inspectorFields = document.getElementById("inspectorFields");
       const targetSelect = document.getElementById("targetSelect");
       const inputJson = document.getElementById("inputJson");
+      const collaboratorNameInput = document.getElementById("collaboratorName");
+      const shareSessionInput = document.getElementById("shareSession");
+      const presenceList = document.getElementById("presenceList");
+      const activityList = document.getElementById("activityList");
+      const commentInput = document.getElementById("commentInput");
       const sessionId = new URLSearchParams(window.location.search).get("session") || "{{ default_session_id }}";
+      const actorId = window.localStorage.getItem("cairnStudioActorId") || randomActorId();
 
       const loopModel = {
         loop: {
@@ -370,6 +410,7 @@
       let replayTimer = null;
       let sessionVersion = 0;
       let remoteSyncTimer = null;
+      let collaborationTimer = null;
 
       async function postJson(url, payload) {
         const response = await fetch(url, {
@@ -388,9 +429,13 @@
       }
 
       async function fetchSession() {
-        const response = await fetch(`/api/session?id=${encodeURIComponent(sessionId)}`);
+        return fetchJson(`/api/session?id=${encodeURIComponent(sessionId)}`, "Session load failed");
+      }
+
+      async function fetchJson(url, fallbackMessage) {
+        const response = await fetch(url);
         const data = await response.json();
-        if (!response.ok) throw new Error(data.error || "Session load failed");
+        if (!response.ok) throw new Error(data.error || fallbackMessage);
         return data;
       }
 
@@ -400,7 +445,9 @@
             session_id: sessionId,
             version: sessionVersion,
             yaml: yamlEditor.value,
-            model: loopModel
+            model: loopModel,
+            actor_id: actorId,
+            actor_name: collaboratorNameInput.value.trim() || "Anonymous builder"
           });
           sessionVersion = response.version || sessionVersion;
         } catch (error) {
@@ -427,6 +474,12 @@
 
       function randomId(prefix) {
         return `${prefix}-${Math.random().toString(36).slice(2, 8)}`;
+      }
+
+      function randomActorId() {
+        const value = `actor-${Math.random().toString(36).slice(2, 10)}`;
+        window.localStorage.setItem("cairnStudioActorId", value);
+        return value;
       }
 
       function addNode(kind, handler, x, y) {
@@ -611,6 +664,73 @@
         }, 650);
       }
 
+      function renderPresence(items) {
+        if (!items.length) {
+          presenceList.innerHTML = '<div class="status">No collaborators active yet.</div>';
+          return;
+        }
+        presenceList.innerHTML = items.map((item) => `
+          <div class="collab-card">
+            <strong>${escapeHtml(item.actor_name)}</strong>
+            <p class="footer-note">Active now · ${escapeHtml(item.actor_id)}</p>
+          </div>
+        `).join("");
+      }
+
+      function renderActivity(activity, comments) {
+        const merged = [
+          ...activity.map((item) => ({ ...item, kindLabel: item.kind || "event" })),
+          ...comments.map((item) => ({ ...item, kindLabel: "comment" }))
+        ]
+          .sort((left, right) => String(right.at).localeCompare(String(left.at)))
+          .slice(0, 12);
+        if (!merged.length) {
+          activityList.innerHTML = '<div class="status">Waiting for collaboration events.</div>';
+          return;
+        }
+        activityList.innerHTML = merged.map((item) => `
+          <div class="activity-card">
+            <strong>${escapeHtml(item.actor_name || "unknown")}</strong>
+            <p class="footer-note">${escapeHtml(item.kindLabel)} · ${escapeHtml(item.message || "")}</p>
+          </div>
+        `).join("");
+      }
+
+      async function refreshCollaboration() {
+        try {
+          const presence = await postJson("/api/session/presence", {
+            session_id: sessionId,
+            actor_id: actorId,
+            actor_name: collaboratorNameInput.value.trim() || "Anonymous builder"
+          });
+          const activity = await fetchJson(`/api/session/activity?id=${encodeURIComponent(sessionId)}`, "Activity load failed");
+          renderPresence(presence.presence || []);
+          renderActivity(activity.activity || [], activity.comments || []);
+        } catch (error) {
+          setStatus(error.message, "error");
+        }
+      }
+
+      async function sendComment() {
+        if (!commentInput.value.trim()) {
+          setStatus("Comment cannot be empty.", "error");
+          return;
+        }
+        try {
+          await postJson("/api/session/comment", {
+            session_id: sessionId,
+            actor_id: actorId,
+            actor_name: collaboratorNameInput.value.trim() || "Anonymous builder",
+            message: commentInput.value
+          });
+          commentInput.value = "";
+          await refreshCollaboration();
+          setStatus("Comment sent to shared room.", "ok");
+        } catch (error) {
+          setStatus(error.message, "error");
+        }
+      }
+
       function downloadYaml() {
         const blob = new Blob([yamlEditor.value], { type: "text/yaml" });
         const url = URL.createObjectURL(blob);
@@ -664,6 +784,7 @@
       document.getElementById("previewLoop").addEventListener("click", previewLoop);
       document.getElementById("syncFromYaml").addEventListener("click", syncModelFromYaml);
       document.getElementById("downloadYaml").addEventListener("click", downloadYaml);
+      document.getElementById("sendComment").addEventListener("click", sendComment);
       document.getElementById("uploadYaml").addEventListener("change", async (event) => {
         const file = event.target.files?.[0];
         if (!file) return;
@@ -681,12 +802,19 @@
       });
 
       async function bootstrap() {
+        collaboratorNameInput.value = window.localStorage.getItem("cairnStudioActorName") || "Builder";
+        collaboratorNameInput.addEventListener("input", () => {
+          window.localStorage.setItem("cairnStudioActorName", collaboratorNameInput.value);
+        });
+        shareSessionInput.value = `${window.location.origin}${window.location.pathname}?session=${encodeURIComponent(sessionId)}`;
         const remote = await fetchSession();
         sessionVersion = remote.version || 0;
         yamlEditor.value = remote.yaml || yamlEditor.value;
         Object.assign(loopModel, remote.model || loopModel);
         await syncModelFromYaml();
         remoteSyncTimer = window.setInterval(pollSession, 1200);
+        await refreshCollaboration();
+        collaborationTimer = window.setInterval(refreshCollaboration, 2500);
       }
 
       bootstrap();

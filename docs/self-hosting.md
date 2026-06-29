@@ -85,6 +85,33 @@ curl -X POST http://127.0.0.1:8790/api/v1/loops/verified-hello/versions/0.1.0/ra
   }'
 ```
 
+Share remote registry snapshot into another CairnHub:
+
+```bash
+curl http://127.0.0.1:8790/api/v1/index/export > /tmp/peer-snapshot.json
+
+curl -X POST http://127.0.0.1:8791/api/v1/index/import \
+  -H "Content-Type: application/json" \
+  -d "{
+    \"peer_id\": \"hub-east\",
+    \"peer_label\": \"Hub East\",
+    \"snapshot\": $(cat /tmp/peer-snapshot.json)
+  }"
+```
+
+Publish runtime trace into hosted CairnLens:
+
+```bash
+python3 -m cairn.main run cairnlang/examples/hello-world.crn \
+  --trace-endpoint http://127.0.0.1:8790/api/v1/traces
+```
+
+Hosted observability UI:
+
+```text
+http://127.0.0.1:8790/lens
+```
+
 ## Checkpointing
 
 ```bash
@@ -97,4 +124,5 @@ python3 -m cairn.main run cairnlang/examples/data-pipeline.crn --resume /tmp/pip
 - Hosted CairnHub file-backed API foundation now built
 - API-key auth and verified publisher registry now built for self-hosting
 - Ratings now built with per-version summaries and review entries
-- Shared multi-node search remains future work
+- Shared remote search/index snapshot flow now built
+- Hosted CairnLens UI now built
