@@ -35,6 +35,14 @@ Goal: make Cairn portable across major agent frameworks.
 - Add checkpointing and budget enforcement
 - Begin `cairn publish` and `cairn install`
 
+### Current Status
+
+- [x] Local sub-loop support
+- [x] Checkpoint/resume foundation
+- [x] Local publish/install/list/inspect foundation
+- [ ] Second framework target
+- [ ] Remote registry backend
+
 ## Phase 3: Production
 
 Goal: make loops observable and safe in real workloads.
@@ -45,6 +53,14 @@ Goal: make loops observable and safe in real workloads.
 - Retry and circuit breaker policies
 - Parallel execution
 - Debug and trace tooling
+
+### Current Status
+
+- [x] Trace JSON export foundation
+- [ ] Retry engine
+- [ ] Circuit breaker
+- [ ] Parallel execution
+- [ ] Rich trace/debug tooling
 
 ## Phase 4: Visual
 

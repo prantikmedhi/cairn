@@ -31,11 +31,14 @@ This backlog is ordered to support fast MVP progress.
 
 ## Later
 
-- [ ] Checkpoint and resume support
+- [x] Checkpoint and resume support
 - [x] Sub-loop imports
-- [ ] Publish and install workflow
-- [ ] Tracing and metrics
+- [x] Local publish and install foundation
+- [x] Trace export foundation
 - [ ] Visual editor bootstrap
+- [ ] Remote registry backend and search
+- [ ] Retry engine and circuit breaker
+- [ ] Parallel execution
 
 ## Suggested First Week Output
 

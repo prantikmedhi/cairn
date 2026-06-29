@@ -17,7 +17,7 @@ This repository now contains a working Phase 1 MVP: a CairnLang schema, parser, 
 ## Project Status
 
 - Status: Phase 1 complete for MVP scope
-- Current focus: begin Phase 2 multi-framework expansion
+- Current focus: Phase 2 foundations plus Phase 3 runtime safety/trace foundations
 - Source of truth: [PRD.md](/Users/prantikpratimmedhi/Documents/Cairn/PRD.md)
 
 ## Core Goals
@@ -54,6 +54,10 @@ pip install -e ".[langchain]"   # optional native langchain-core runnable path
 python3 -m cairn.main validate cairnlang/examples/hello-world.crn
 python3 -m cairn.main run cairnlang/examples/hello-world.crn --input message=forge
 python3 -m cairn.main init ./demo-loop
+python3 -m cairn.main run cairnlang/examples/data-pipeline.crn --checkpoint-file /tmp/pipeline.json --max-steps 1
+python3 -m cairn.main run cairnlang/examples/data-pipeline.crn --resume /tmp/pipeline.json
+python3 -m cairn.main publish cairnlang/examples/hello-world.crn --registry .cairnhub
+python3 -m cairn.main list --registry .cairnhub
 PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 python3 -m pytest -q
 ```
 
@@ -79,16 +83,20 @@ python3 -m cairn.main run cairnlang/examples/hello-world.crn --input message=for
 - Budget enforcement for iterations, duration, and cost cap structure
 - `langchain` plugin target with optional native `langchain-core` runnable execution and builtin fallback
 - Local sub-loop composition with relative file imports
+- Checkpoint/resume execution flow
+- Trace JSON export and replay-friendly CLI output
+- Local CairnHub-style publish/install/list/inspect foundation
 - Example loops for happy path, branching, data pipeline, failure hook, budget hook
 - Composed example loop using imported sub-loop
-- CLI commands: `init`, `validate`, `run`
+- CLI commands: `init`, `validate`, `run`, `inspect`, `trace`, `publish`, `install`, `list`, `registry-inspect`
 - Automated tests covering parser, validator, executor, and CLI
 
 ## Not Built Yet
 
 - Multi-framework plugins beyond `langchain`
-- Registry, publish/install workflow, tracing UI, visual editor
-- Checkpoint/resume, retry engine, parallel execution, circuit breaker
+- Hosted registry backend, remote discovery, auth, ratings, and version APIs
+- Visual editor app
+- Retry engine, parallel execution, circuit breaker, rich observability stack
 
 ## Contributing
 

@@ -1,6 +1,6 @@
 from pathlib import Path
 
-from cairnforge.executor import execute_loop
+from cairnforge.executor import execute_loop, execute_loop_with_runtime_controls
 from cairnforge.parser import load_loop_file
 
 
@@ -53,3 +53,26 @@ def test_executor_runs_local_subloop() -> None:
     assert result.success is True
     assert result.final_outputs == {"greeting": "hello phase-two"}
     assert [state.state_id for state in result.state_results] == ["greet"]
+
+
+def test_executor_can_checkpoint_and_resume(tmp_path: Path) -> None:
+    loop = load_loop_file(Path("cairnlang/examples/data-pipeline.crn"))
+    checkpoint_file = tmp_path / "pipeline-checkpoint.json"
+
+    paused = execute_loop_with_runtime_controls(
+        loop,
+        checkpoint_path=checkpoint_file,
+        max_steps=1,
+    )
+
+    assert paused.success is False
+    assert paused.metadata["paused"] is True
+    assert checkpoint_file.exists()
+
+    resumed = execute_loop_with_runtime_controls(
+        loop,
+        resume_from=checkpoint_file,
+    )
+
+    assert resumed.success is True
+    assert resumed.final_outputs["destination"] == "warehouse://normalized:orders.csv"

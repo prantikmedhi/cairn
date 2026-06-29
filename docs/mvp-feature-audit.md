@@ -26,9 +26,8 @@ This audit compares current repo state to PRD Phase 1 requirements.
 ## Not Delivered
 
 - Real multi-framework support
-- Registry and `publish/install/search`
-- `trace`, `debug`, `cost`, `test` CLI commands
-- Checkpoint/resume
+- Hosted registry and remote `publish/install/search`
+- `debug`, `cost`, hosted trace UI
 - Retry engine, circuit breaker, parallel execution
 - Visual editor and observability stack
 
@@ -42,6 +41,15 @@ Phase 1 exit criteria in [roadmap.md](/Users/prantikpratimmedhi/Documents/Cairn/
 - tests cover happy path and key validation failures
 
 Next unlocked work is Phase 2: multi-framework expansion.
+
+## Beyond Phase 1
+
+Already started:
+
+- local sub-loop imports
+- checkpoint/resume
+- local registry-style publish/install/list/inspect
+- trace JSON export
 
 ## Verification
 

@@ -12,7 +12,16 @@ This repo is prepared for an implementation-first workflow. Use this guide to be
 
 ## Current Status
 
-Phase 1 is complete for MVP scope. Phase 2 has started with local sub-loop imports/composition. Next highest-value work is multi-framework expansion plus checkpoint/resume.
+Phase 1 is complete for MVP scope.
+
+Current delivered foundations beyond Phase 1:
+
+- local sub-loop imports/composition
+- checkpoint/resume execution
+- local publish/install registry workflow
+- trace file export
+
+Next highest-value work is multi-framework expansion plus stronger production controls.
 
 ## Suggested Order
 
