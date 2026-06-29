@@ -324,6 +324,7 @@
       const inspectorFields = document.getElementById("inspectorFields");
       const targetSelect = document.getElementById("targetSelect");
       const inputJson = document.getElementById("inputJson");
+      const sessionId = new URLSearchParams(window.location.search).get("session") || "{{ default_session_id }}";
 
       const loopModel = {
         loop: {
@@ -339,6 +340,8 @@
 
       let selectedNodeId = null;
       let replayTimer = null;
+      let sessionVersion = 0;
+      let remoteSyncTimer = null;
 
       async function postJson(url, payload) {
         const response = await fetch(url, {
@@ -354,6 +357,44 @@
       function setStatus(text, kind = "") {
         validationStatus.textContent = text;
         validationStatus.className = kind ? `status ${kind}` : "status";
+      }
+
+      async function fetchSession() {
+        const response = await fetch(`/api/session?id=${encodeURIComponent(sessionId)}`);
+        const data = await response.json();
+        if (!response.ok) throw new Error(data.error || "Session load failed");
+        return data;
+      }
+
+      async function syncSessionSave() {
+        try {
+          const response = await postJson("/api/session/save", {
+            session_id: sessionId,
+            version: sessionVersion,
+            yaml: yamlEditor.value,
+            model: loopModel
+          });
+          sessionVersion = response.version || sessionVersion;
+        } catch (error) {
+          setStatus(error.message, "error");
+        }
+      }
+
+      async function pollSession() {
+        try {
+          const remote = await fetchSession();
+          if ((remote.version || 0) > sessionVersion) {
+            sessionVersion = remote.version || 0;
+            yamlEditor.value = remote.yaml || yamlEditor.value;
+            Object.assign(loopModel, remote.model || loopModel);
+            selectedNodeId = loopModel.loop.states[0]?.id || selectedNodeId;
+            renderCanvas();
+            renderInspector();
+            setStatus(`Synced shared session "${sessionId}"`, "ok");
+          }
+        } catch (error) {
+          setStatus(error.message, "error");
+        }
       }
 
       function randomId(prefix) {
@@ -477,6 +518,7 @@
           selectedNodeId = loopModel.loop.states[0]?.id || null;
           renderCanvas();
           renderInspector();
+          await syncSessionSave();
           setStatus("Canvas synced from YAML.", "ok");
         } catch (error) {
           setStatus(error.message, "error");
@@ -487,6 +529,7 @@
         try {
           const data = await postJson("/api/model/to-yaml", loopModel);
           yamlEditor.value = data.yaml;
+          await syncSessionSave();
           validateCurrentYaml();
         } catch (error) {
           setStatus(error.message, "error");
@@ -603,10 +646,22 @@
       let validateTimer = null;
       yamlEditor.addEventListener("input", () => {
         if (validateTimer) window.clearTimeout(validateTimer);
-        validateTimer = window.setTimeout(validateCurrentYaml, 300);
+        validateTimer = window.setTimeout(async () => {
+          await validateCurrentYaml();
+          await syncSessionSave();
+        }, 300);
       });
 
-      syncModelFromYaml();
+      async function bootstrap() {
+        const remote = await fetchSession();
+        sessionVersion = remote.version || 0;
+        yamlEditor.value = remote.yaml || yamlEditor.value;
+        Object.assign(loopModel, remote.model || loopModel);
+        await syncModelFromYaml();
+        remoteSyncTimer = window.setInterval(pollSession, 1200);
+      }
+
+      bootstrap();
     </script>
   </body>
 </html>

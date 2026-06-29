@@ -1,11 +1,12 @@
 from __future__ import annotations
 
 import json
+from datetime import datetime, timezone
 from http import HTTPStatus
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from typing import Any
-from urllib.parse import urlparse
+from urllib.parse import parse_qs, urlparse
 
 import yaml
 
@@ -17,6 +18,7 @@ from cairnforge.validator import CairnValidationError, validate_loop_definition
 
 ROOT = Path(__file__).resolve().parent
 TEMPLATE_DIR = ROOT / "templates"
+SESSION_DIR = ROOT / "sessions"
 STARTER_LOOP = """cairn: "1.0"
 
 loop:
@@ -54,7 +56,8 @@ def render_index_html() -> str:
         "starter_yaml": STARTER_LOOP,
         "available_targets": ["langchain", "langgraph", "crewai", "autogen", "openai"],
         "phase_badge": "Phase 4 Beta",
-        "collaboration_status": "Pending: local single-user beta only",
+        "collaboration_status": "Local collaboration enabled: shared session sync with last-write-wins",
+        "default_session_id": "default",
     }
     try:
         from jinja2 import Environment, FileSystemLoader, select_autoescape
@@ -189,6 +192,43 @@ def preview_yaml_text(yaml_text: str, inputs: dict[str, Any] | None = None, targ
     }
 
 
+def load_session(session_id: str) -> dict[str, Any]:
+    session_path = _session_path(session_id)
+    if not session_path.exists():
+        return {
+            "session_id": session_id,
+            "version": 0,
+            "updated_at": None,
+            "yaml": STARTER_LOOP,
+            "model": yaml_to_canvas_model(STARTER_LOOP),
+        }
+    return json.loads(session_path.read_text(encoding="utf-8"))
+
+
+def save_session(session_id: str, yaml_text: str, model: dict[str, Any], client_version: int | None = None) -> dict[str, Any]:
+    session_path = _session_path(session_id)
+    current = load_session(session_id)
+    current_version = int(current.get("version", 0))
+    if client_version is not None and client_version < current_version:
+        return current
+
+    payload = {
+        "session_id": session_id,
+        "version": current_version + 1,
+        "updated_at": datetime.now(timezone.utc).isoformat(),
+        "yaml": yaml_text,
+        "model": model,
+    }
+    session_path.parent.mkdir(parents=True, exist_ok=True)
+    session_path.write_text(json.dumps(payload, indent=2), encoding="utf-8")
+    return payload
+
+
+def _session_path(session_id: str) -> Path:
+    safe = "".join(character if character.isalnum() or character in {"-", "_"} else "-" for character in session_id) or "default"
+    return SESSION_DIR / f"{safe}.json"
+
+
 class CairnStudioHandler(BaseHTTPRequestHandler):
     server_version = "CairnStudio/0.1"
 
@@ -196,6 +236,11 @@ class CairnStudioHandler(BaseHTTPRequestHandler):
         parsed = urlparse(self.path)
         if parsed.path == "/":
             self._send_html(render_index_html())
+            return
+        if parsed.path == "/api/session":
+            query = parse_qs(parsed.query)
+            session_id = query.get("id", ["default"])[0]
+            self._send_json(load_session(session_id))
             return
         self.send_error(HTTPStatus.NOT_FOUND, "Not Found")
 
@@ -220,6 +265,12 @@ class CairnStudioHandler(BaseHTTPRequestHandler):
                 return
             if parsed.path == "/api/model/to-yaml":
                 self._send_json({"yaml": canvas_model_to_yaml(payload)})
+                return
+            if parsed.path == "/api/session/save":
+                session_id = payload.get("session_id", "default")
+                yaml_text = payload.get("yaml", STARTER_LOOP)
+                model = payload.get("model") or yaml_to_canvas_model(yaml_text)
+                self._send_json(save_session(session_id, yaml_text, model, client_version=payload.get("version")))
                 return
         except (ValueError, CairnValidationError, RuntimeError) as exc:
             self._send_json({"error": str(exc)}, status=HTTPStatus.BAD_REQUEST)

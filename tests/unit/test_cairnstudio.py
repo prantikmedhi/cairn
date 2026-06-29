@@ -3,8 +3,10 @@ import types
 
 from cairnstudio.app import (
     canvas_model_to_yaml,
+    load_session,
     preview_yaml_text,
     render_index_html,
+    save_session,
     validate_yaml_text,
     yaml_to_canvas_model,
 )
@@ -80,3 +82,16 @@ loop:
     assert validated["valid"] is True
     assert preview["success"] is True
     assert preview["final_outputs"] == {"result": "ok"}
+
+
+def test_session_save_and_load(tmp_path, monkeypatch) -> None:
+    from cairnstudio import app as studio_app
+
+    monkeypatch.setattr(studio_app, "SESSION_DIR", tmp_path / "sessions")
+    model = yaml_to_canvas_model(studio_app.STARTER_LOOP)
+    saved = save_session("team-room", studio_app.STARTER_LOOP, model)
+    loaded = load_session("team-room")
+
+    assert saved["version"] == 1
+    assert loaded["session_id"] == "team-room"
+    assert loaded["yaml"] == studio_app.STARTER_LOOP

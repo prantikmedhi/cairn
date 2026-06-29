@@ -41,10 +41,11 @@ This backlog is ordered to support fast MVP progress.
 - [x] Additional framework adapter targets
 - [x] CLI debug / cost / test / watch foundations
 - [x] Visual editor bootstrap
-- [ ] Collaborative editing
+- [x] Local collaborative editing
 - [ ] Remote registry backend and search
 - [ ] Hosted ratings and verified publishers
 - [ ] Rich observability UI
+- [ ] Rich multi-user hosted collaboration
 
 ## Suggested First Week Output
 

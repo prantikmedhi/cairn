@@ -108,7 +108,7 @@ python3 -m cairn.main run cairnlang/examples/hello-world.crn --input message=for
 ## Not Built Yet
 
 - Hosted registry backend, remote discovery, auth, ratings, and version APIs
-- Collaborative editing in CairnStudio
+- Local shared-session collaboration in CairnStudio
 - Rich observability stack and hosted CairnLens UI
 - Community and hosted milestones from PRD that depend on external adoption
 

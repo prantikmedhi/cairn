@@ -9,7 +9,7 @@ Current beta scope:
 - real-time validation
 - live execution preview
 - trace replay visualization
-- local single-user workflow
+- local shared-session collaboration
 
 Run:
 
@@ -25,6 +25,5 @@ http://127.0.0.1:8787
 
 Still pending:
 
-- collaborative editing
-- multi-user presence
+- rich multi-user presence
 - hosted visual backend

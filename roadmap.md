@@ -86,7 +86,8 @@ Goal: support loop authoring beyond handwritten YAML.
 - [x] Live execution preview
 - [x] Trace replay visualization
 - [x] Import/export `.crn`
-- [ ] Collaborative editing
+- [x] Local collaborative editing via shared session sync
+- [ ] Rich multi-user presence / hosted collaboration
 
 ## Current Recommendation
 
