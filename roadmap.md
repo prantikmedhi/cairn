@@ -39,8 +39,9 @@ Goal: make Cairn portable across major agent frameworks.
 
 - [x] Local sub-loop support
 - [x] Checkpoint/resume foundation
-- [x] Local publish/install/list/inspect foundation
-- [ ] Second framework target
+- [x] Local publish/install/list/search/inspect foundation
+- [x] Second framework target
+- [x] Additional adapter targets: `crewai`, `autogen`, `openai`
 - [ ] Remote registry backend
 
 ## Phase 3: Production
@@ -57,10 +58,15 @@ Goal: make loops observable and safe in real workloads.
 ### Current Status
 
 - [x] Trace JSON export foundation
-- [ ] Retry engine
-- [ ] Circuit breaker
-- [ ] Parallel execution
-- [ ] Rich trace/debug tooling
+- [x] Retry engine
+- [x] Circuit breaker foundation
+- [x] Parallel execution foundation
+- [x] `debug`, `trace`, `cost`, `test`, `watch` CLI foundations
+- [x] Plugin SDK notes
+- [x] Self-hosting docs
+- [x] Grafana starter template
+- [ ] Hosted ratings / verified publishers
+- [ ] Rich trace/debug UI
 
 ## Phase 4: Visual
 

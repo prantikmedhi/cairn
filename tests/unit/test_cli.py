@@ -84,3 +84,28 @@ def test_inspect_command() -> None:
 
     assert result.exit_code == 0
     assert '"loop_id": "composed-hello"' in result.stdout
+
+
+def test_search_and_cost_commands(tmp_path: Path) -> None:
+    registry = tmp_path / "registry"
+    runner.invoke(app, ["publish", "cairnlang/examples/hello-world.crn", "--registry", str(registry)])
+
+    search_result = runner.invoke(app, ["search", "hello", "--registry", str(registry)])
+    assert search_result.exit_code == 0
+    assert '"hello-world"' in search_result.stdout
+
+    cost_result = runner.invoke(app, ["cost", "cairnlang/examples/hello-world.crn"])
+    assert cost_result.exit_code == 0
+    assert '"loop_id": "hello-world"' in cost_result.stdout
+
+
+def test_debug_and_watch_commands(tmp_path: Path) -> None:
+    debug_result = runner.invoke(app, ["debug", "cairnlang/examples/hello-world.crn", "--input", "message=forge"])
+    assert debug_result.exit_code == 0
+    assert '"success": true' in debug_result.stdout
+
+    watch_file = tmp_path / "watch.crn"
+    watch_file.write_text(Path("cairnlang/examples/hello-world.crn").read_text(), encoding="utf-8")
+    watch_result = runner.invoke(app, ["watch", str(watch_file), "--cycles", "1"])
+    assert watch_result.exit_code == 0
+    assert '"loop_id": "hello-world"' in watch_result.stdout

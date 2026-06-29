@@ -54,6 +54,24 @@ def list_loops(registry_path: str | Path) -> list[dict]:
     return [json.loads(path.read_text(encoding="utf-8")) for path in manifests]
 
 
+def search_loops(query: str, registry_path: str | Path) -> list[dict]:
+    query_text = query.strip().lower()
+    if not query_text:
+        return list_loops(registry_path)
+    matches = []
+    for manifest in list_loops(registry_path):
+        haystack = " ".join(
+            [
+                manifest.get("id", ""),
+                manifest.get("name", ""),
+                manifest.get("description", ""),
+            ]
+        ).lower()
+        if query_text in haystack:
+            matches.append(manifest)
+    return matches
+
+
 def inspect_loop(ref: str, registry_path: str | Path) -> dict:
     loop_id, version = _parse_ref(ref)
     registry_root = Path(registry_path)

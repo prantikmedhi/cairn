@@ -51,6 +51,27 @@ Already started:
 - local registry-style publish/install/list/inspect
 - trace JSON export
 
+## Phase 2-3 Local Repo Status
+
+Delivered in local repo scope:
+
+- multi-target adapters for `langchain`, `langgraph`, `crewai`, `autogen`, `openai`
+- local registry search
+- retry guards
+- circuit breaker foundation
+- parallel fan-out execution
+- `debug`, `cost`, `test`, `watch`
+- plugin SDK notes
+- self-hosting notes
+- Grafana starter dashboard template
+
+Still open:
+
+- hosted registry backend
+- hosted ratings / verified publishers
+- rich observability UI
+- visual editor
+
 ## Verification
 
 Run:

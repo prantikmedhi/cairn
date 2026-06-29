@@ -1,0 +1,31 @@
+{
+  "title": "Cairn Runtime",
+  "schemaVersion": 39,
+  "version": 1,
+  "panels": [
+    {
+      "type": "stat",
+      "title": "Loop Executions",
+      "gridPos": { "x": 0, "y": 0, "w": 6, "h": 4 },
+      "targets": [{ "expr": "sum(cairn_loop_executions_total)" }]
+    },
+    {
+      "type": "stat",
+      "title": "Retry Events",
+      "gridPos": { "x": 6, "y": 0, "w": 6, "h": 4 },
+      "targets": [{ "expr": "sum(cairn_retry_events_total)" }]
+    },
+    {
+      "type": "timeseries",
+      "title": "Execution Duration",
+      "gridPos": { "x": 0, "y": 4, "w": 12, "h": 8 },
+      "targets": [{ "expr": "rate(cairn_execution_duration_ms_sum[5m])" }]
+    },
+    {
+      "type": "timeseries",
+      "title": "Cost Tracking",
+      "gridPos": { "x": 12, "y": 4, "w": 12, "h": 8 },
+      "targets": [{ "expr": "sum(cairn_execution_cost_usd)" }]
+    }
+  ]
+}

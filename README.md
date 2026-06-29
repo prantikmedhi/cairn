@@ -5,7 +5,7 @@
 
 Cairn is an open runtime and DSL for building intelligent task loops across AI agent frameworks.
 
-This repository now contains a working Phase 1 MVP: a CairnLang schema, parser, semantic validator, executor, optional native `langchain-core` runnable integration, CLI commands, example loops, and automated tests.
+This repository now contains working local foundations through Phases 1-3: CairnLang schema, parser, semantic validator, multi-target runtime, local registry, checkpointing, retries, parallel fan-out, observability foundations, CLI commands, example loops, and automated tests.
 
 ## Why Cairn
 
@@ -16,8 +16,8 @@ This repository now contains a working Phase 1 MVP: a CairnLang schema, parser, 
 
 ## Project Status
 
-- Status: Phase 1 complete for MVP scope
-- Current focus: Phase 2 foundations plus Phase 3 runtime safety/trace foundations
+- Status: Phases 1-3 code foundations complete for local repo scope
+- Current focus: Phase 4 visual editor for non-developers
 - Source of truth: [PRD.md](/Users/prantikpratimmedhi/Documents/Cairn/PRD.md)
 
 ## Core Goals
@@ -41,8 +41,8 @@ This repository now contains a working Phase 1 MVP: a CairnLang schema, parser, 
 - `cairnlang/`: language spec, schema, and examples
 - `cairnforge/`: parser, validator, budget guard, executor, plugins
 - `cairn/`: working Typer CLI
-- `cairnhub/`: future registry backend
-- `cairnstudio/`: future visual editor
+- `cairnhub/`: local registry foundation and future hosted backend
+- `cairnstudio/`: upcoming visual editor
 - `tests/`: unit, integration, and e2e coverage
 - `docs/`: supporting documentation
 
@@ -53,11 +53,18 @@ pip install -e ".[dev]"
 pip install -e ".[langchain]"   # optional native langchain-core runnable path
 python3 -m cairn.main validate cairnlang/examples/hello-world.crn
 python3 -m cairn.main run cairnlang/examples/hello-world.crn --input message=forge
+python3 -m cairn.main run cairnlang/examples/retry-recovery.crn
+python3 -m cairn.main run cairnlang/examples/parallel-fanout.crn
+python3 -m cairn.main run cairnlang/examples/hello-world.crn --target langgraph --input message=graph
 python3 -m cairn.main init ./demo-loop
 python3 -m cairn.main run cairnlang/examples/data-pipeline.crn --checkpoint-file /tmp/pipeline.json --max-steps 1
 python3 -m cairn.main run cairnlang/examples/data-pipeline.crn --resume /tmp/pipeline.json
 python3 -m cairn.main publish cairnlang/examples/hello-world.crn --registry .cairnhub
 python3 -m cairn.main list --registry .cairnhub
+python3 -m cairn.main search hello --registry .cairnhub
+python3 -m cairn.main debug cairnlang/examples/retry-recovery.crn
+python3 -m cairn.main cost cairnlang/examples/parallel-fanout.crn
+python3 -m cairn.main test
 PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 python3 -m pytest -q
 ```
 
@@ -82,21 +89,26 @@ python3 -m cairn.main run cairnlang/examples/hello-world.crn --input message=for
 - Execution engine with transitions and hooks
 - Budget enforcement for iterations, duration, and cost cap structure
 - `langchain` plugin target with optional native `langchain-core` runnable execution and builtin fallback
+- `langgraph`, `crewai`, `autogen`, and `openai` target adapters
 - Local sub-loop composition with relative file imports
 - Checkpoint/resume execution flow
+- Retry guards and circuit breaker foundation
+- Parallel fan-out execution
 - Trace JSON export and replay-friendly CLI output
-- Local CairnHub-style publish/install/list/inspect foundation
+- Local CairnHub-style publish/install/list/search/inspect foundation
 - Example loops for happy path, branching, data pipeline, failure hook, budget hook
 - Composed example loop using imported sub-loop
-- CLI commands: `init`, `validate`, `run`, `inspect`, `trace`, `publish`, `install`, `list`, `registry-inspect`
+- Retry and parallel example loops
+- CLI commands: `init`, `validate`, `run`, `inspect`, `trace`, `publish`, `install`, `list`, `search`, `registry-inspect`, `debug`, `cost`, `test`, `watch`
 - Automated tests covering parser, validator, executor, and CLI
+- Optional Jinja templating path for template strings when `jinja2` is installed
 
 ## Not Built Yet
 
-- Multi-framework plugins beyond `langchain`
 - Hosted registry backend, remote discovery, auth, ratings, and version APIs
 - Visual editor app
-- Retry engine, parallel execution, circuit breaker, rich observability stack
+- Rich observability stack and hosted CairnLens UI
+- Community and hosted milestones from PRD that depend on external adoption
 
 ## Contributing
 
@@ -107,6 +119,10 @@ Read [CONTRIBUTING.md](/Users/prantikpratimmedhi/Documents/Cairn/CONTRIBUTING.md
 - Current version: `0.1.0`
 - Release notes: [CHANGELOG.md](/Users/prantikpratimmedhi/Documents/Cairn/CHANGELOG.md)
 - Release checklist: [docs/release-v0.1.0.md](/Users/prantikpratimmedhi/Documents/Cairn/docs/release-v0.1.0.md)
+- CLI reference: [docs/cli-reference.md](/Users/prantikpratimmedhi/Documents/Cairn/docs/cli-reference.md)
+- Observability notes: [docs/observability.md](/Users/prantikpratimmedhi/Documents/Cairn/docs/observability.md)
+- Plugin SDK notes: [docs/plugin-development.md](/Users/prantikpratimmedhi/Documents/Cairn/docs/plugin-development.md)
+- Self-hosting notes: [docs/self-hosting.md](/Users/prantikpratimmedhi/Documents/Cairn/docs/self-hosting.md)
 
 ## Recommended First Build Slice
 

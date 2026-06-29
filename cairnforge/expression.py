@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import ast
+import importlib
 import re
 from types import SimpleNamespace
 from typing import Any
@@ -17,6 +18,9 @@ def render_value(value: Any, context: dict[str, Any]) -> Any:
     if isinstance(value, str):
         matches = list(_EXPR_PATTERN.finditer(value))
         if not matches:
+            rendered = _render_jinja_template(value, context)
+            if rendered is not None:
+                return rendered
             return value
         if len(matches) == 1 and matches[0].span() == (0, len(value)):
             return evaluate_expression(matches[0].group(1), context)
@@ -53,6 +57,17 @@ def _to_namespace(value: Any) -> Any:
     if isinstance(value, list):
         return [_to_namespace(item) for item in value]
     return value
+
+
+def _render_jinja_template(value: str, context: dict[str, Any]) -> str | None:
+    if "{{" not in value and "{%" not in value:
+        return None
+    try:
+        module = importlib.import_module("jinja2")
+    except ImportError:
+        return None
+    template = module.Environment(autoescape=False).from_string(value)
+    return template.render(context)
 
 
 def _eval_node(node: ast.AST, namespace: dict[str, Any]) -> Any:

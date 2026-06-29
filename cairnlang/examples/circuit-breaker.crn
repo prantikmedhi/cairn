@@ -1,0 +1,19 @@
+cairn: "1.0"
+
+loop:
+  id: circuit-breaker
+  name: Circuit Breaker
+  version: 0.2.0
+  runtime:
+    circuit_breaker_max_failures: 1
+  outputs:
+    status:
+      value: failed
+  budget:
+    max_iterations: 2
+    max_duration: 30s
+  states:
+    - id: boom
+      handler: core.fail
+      inputs:
+        message: permanent failure

@@ -7,6 +7,7 @@ from cairnforge.compiler import compile_state
 from cairnforge.models import StateDefinition
 
 from .base import BasePlugin
+from .core_handlers import execute_core_handler
 
 
 class LangChainPlugin(BasePlugin):
@@ -48,20 +49,7 @@ class LangChainPlugin(BasePlugin):
         return {"plugin": self.name, "runtime_mode": runtime_mode}
 
     def _execute_builtin(self, state: StateDefinition, resolved_inputs: dict[str, Any], runtime_context: dict[str, Any]) -> dict[str, Any]:
-        handler = state.handler or ""
-        if handler in {"core.collect", "core.set", "langchain.collect"}:
-            return dict(resolved_inputs)
-        if handler in {"core.template", "langchain.prompt"}:
-            return dict(resolved_inputs)
-        if handler == "core.condition":
-            condition = runtime_context.get("current_condition")
-            return {"passed": bool(condition)}
-        if handler == "core.echo":
-            return {"value": resolved_inputs}
-        if handler == "core.fail":
-            message = resolved_inputs.get("message", state.raw.get("message", "State requested failure"))
-            raise RuntimeError(str(message))
-        raise RuntimeError(f"Unsupported handler '{handler}' for target '{self.name}'")
+        return execute_core_handler(self.name, state, resolved_inputs, runtime_context)
 
     @staticmethod
     def _load_runnable_lambda():

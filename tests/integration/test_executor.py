@@ -76,3 +76,31 @@ def test_executor_can_checkpoint_and_resume(tmp_path: Path) -> None:
 
     assert resumed.success is True
     assert resumed.final_outputs["destination"] == "warehouse://normalized:orders.csv"
+
+
+def test_executor_runs_retry_recovery_loop() -> None:
+    loop = load_loop_file(Path("cairnlang/examples/retry-recovery.crn"))
+
+    result = execute_loop(loop)
+
+    assert result.success is True
+    assert result.final_outputs == {"recovered": True, "attempt": 2}
+
+
+def test_executor_opens_circuit_breaker() -> None:
+    loop = load_loop_file(Path("cairnlang/examples/circuit-breaker.crn"))
+
+    result = execute_loop(loop)
+
+    assert result.success is False
+    assert "Circuit breaker opened" in (result.error or "")
+
+
+def test_executor_runs_parallel_fanout() -> None:
+    loop = load_loop_file(Path("cairnlang/examples/parallel-fanout.crn"))
+
+    result = execute_loop(loop)
+
+    assert result.success is True
+    assert result.final_outputs == {"first": "alpha", "second": "beta"}
+    assert [state.state_id for state in result.state_results] == ["start", "branch_one", "branch_two"]

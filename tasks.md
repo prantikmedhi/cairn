@@ -34,11 +34,16 @@ This backlog is ordered to support fast MVP progress.
 - [x] Checkpoint and resume support
 - [x] Sub-loop imports
 - [x] Local publish and install foundation
+- [x] Local registry search
 - [x] Trace export foundation
+- [x] Retry engine and circuit breaker
+- [x] Parallel execution
+- [x] Additional framework adapter targets
+- [x] CLI debug / cost / test / watch foundations
 - [ ] Visual editor bootstrap
 - [ ] Remote registry backend and search
-- [ ] Retry engine and circuit breaker
-- [ ] Parallel execution
+- [ ] Hosted ratings and verified publishers
+- [ ] Rich observability UI
 
 ## Suggested First Week Output
 

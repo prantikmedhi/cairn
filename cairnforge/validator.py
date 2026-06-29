@@ -64,6 +64,9 @@ def validate_loop_definition(loop: LoopDefinition, seen_paths: set[str] | None =
             raise CairnValidationError(f"State '{state.id}' must define exactly one of handler or loop")
         if state.loop_ref and state.loop_ref not in import_names:
             raise CairnValidationError(f"State '{state.id}' references unknown sub-loop '{state.loop_ref}'")
+        for parallel_state_id in state.raw.get("parallel", []) if isinstance(state.raw, dict) else []:
+            if parallel_state_id not in state_ids and parallel_state_id not in [item.id for item in loop.states]:
+                raise CairnValidationError(f"State '{state.id}' references unknown parallel state '{parallel_state_id}'")
 
     known_states = set(state_ids)
     transitions = list(loop.transitions)

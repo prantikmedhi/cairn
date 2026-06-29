@@ -1,14 +1,17 @@
 from __future__ import annotations
 
 import json
+import subprocess
+import time
 from pathlib import Path
 
 import typer
 from rich.console import Console
 
-from cairnhub.local_registry import inspect_loop, install_loop, list_loops, publish_loop
+from cairnhub.local_registry import inspect_loop, install_loop, list_loops, publish_loop, search_loops
 from cairnforge.compiler import compile_loop
 from cairnforge.executor import execute_loop, execute_loop_with_runtime_controls
+from cairnforge.plugins import get_builtin_plugins
 from cairnforge.parser import load_loop_file
 from cairnforge.validator import CairnValidationError, validate_loop_definition
 
@@ -55,6 +58,13 @@ def _result_payload(result) -> dict[str, object]:
     }
 
 
+def _load_inputs(items: list[str] | None, inputs_file: Path | None) -> dict[str, object]:
+    provided_inputs = _parse_key_values(items or [])
+    if inputs_file is not None:
+        provided_inputs.update(json.loads(inputs_file.read_text(encoding="utf-8")))
+    return provided_inputs
+
+
 @app.command()
 def validate(path: Path) -> None:
     """Validate .crn file against schema and semantic rules."""
@@ -81,9 +91,7 @@ def run(
 ) -> None:
     """Execute loop and print result JSON."""
 
-    provided_inputs = _parse_key_values(input or [])
-    if inputs_file is not None:
-        provided_inputs.update(json.loads(inputs_file.read_text(encoding="utf-8")))
+    provided_inputs = _load_inputs(input, inputs_file)
 
     loop = load_loop_file(path)
     result = execute_loop_with_runtime_controls(
@@ -173,6 +181,7 @@ def inspect(path: Path) -> None:
                 for state in loop.states
             ],
             "transition_count": compiled.transition_count,
+            "available_targets": sorted(get_builtin_plugins().keys()),
         }
     )
 
@@ -217,6 +226,16 @@ def list_command(
     console.print_json(data={"loops": list_loops(registry)})
 
 
+@app.command()
+def search(
+    query: str = typer.Argument(..., help="Free-text search query"),
+    registry: Path = typer.Option(DEFAULT_REGISTRY_PATH, "--registry", help="Local registry path"),
+) -> None:
+    """Search loops in local registry."""
+
+    console.print_json(data={"loops": search_loops(query, registry)})
+
+
 @app.command(name="registry-inspect")
 def registry_inspect(
     ref: str,
@@ -225,6 +244,92 @@ def registry_inspect(
     """Inspect published loop manifest from local registry."""
 
     console.print_json(data=inspect_loop(ref, registry))
+
+
+@app.command()
+def cost(path: Path) -> None:
+    """Estimate static loop cost envelope."""
+
+    loop = load_loop_file(path)
+    validate_loop_definition(loop)
+    per_state = []
+    total_state_cost = 0.0
+    for state in loop.states:
+        state_cost = float(state.raw.get("cost_usd", 0.0) or 0.0)
+        total_state_cost += state_cost
+        per_state.append({"state_id": state.id, "estimated_cost_usd": state_cost})
+    console.print_json(
+        data={
+            "loop_id": loop.id,
+            "estimated_state_cost_usd": total_state_cost,
+            "budget_max_cost_usd": loop.budget.max_cost_usd,
+            "max_iterations": loop.budget.max_iterations,
+            "per_state": per_state,
+        }
+    )
+
+
+@app.command()
+def debug(
+    path: Path,
+    target: str = typer.Option("langchain", "--target", help="Execution target plugin"),
+    input: list[str] = typer.Option(None, "--input", help="Loop input as key=value"),
+    inputs_file: Path | None = typer.Option(None, "--inputs-file", help="JSON file with loop inputs"),
+) -> None:
+    """Run loop and print condensed debug summary."""
+
+    loop = load_loop_file(path)
+    result = execute_loop(loop, inputs=_load_inputs(input, inputs_file), target=target)
+    console.print_json(
+        data={
+            "loop_id": result.loop_id,
+            "success": result.success,
+            "error": result.error,
+            "states": [
+                {"state_id": item.state_id, "skipped": item.skipped, "outputs": item.outputs}
+                for item in result.state_results
+            ],
+            "metadata": result.metadata,
+        }
+    )
+    if not result.success:
+        raise typer.Exit(code=1)
+
+
+@app.command(name="test")
+def test_command(pytest_args: list[str] = typer.Argument(None)) -> None:
+    """Run repo test suite."""
+
+    args = ["python3", "-m", "pytest", "-q", *list(pytest_args or [])]
+    completed = subprocess.run(args, check=False)
+    if completed.returncode != 0:
+        raise typer.Exit(code=completed.returncode)
+
+
+@app.command()
+def watch(
+    path: Path,
+    target: str = typer.Option("langchain", "--target", help="Execution target plugin"),
+    input: list[str] = typer.Option(None, "--input", help="Loop input as key=value"),
+    inputs_file: Path | None = typer.Option(None, "--inputs-file", help="JSON file with loop inputs"),
+    interval: float = typer.Option(1.0, "--interval", help="Polling interval in seconds"),
+    cycles: int = typer.Option(2, "--cycles", help="Number of reruns before exit"),
+) -> None:
+    """Hot-reload style loop runner for local iteration."""
+
+    provided_inputs = _load_inputs(input, inputs_file)
+    last_mtime = None
+    remaining = cycles
+    while remaining > 0:
+        current_mtime = path.stat().st_mtime
+        if last_mtime is None or current_mtime != last_mtime:
+            loop = load_loop_file(path)
+            result = execute_loop(loop, inputs=provided_inputs, target=target)
+            console.print_json(data=_result_payload(result))
+            last_mtime = current_mtime
+            remaining -= 1
+        if remaining > 0:
+            time.sleep(interval)
 
 
 if __name__ == "__main__":

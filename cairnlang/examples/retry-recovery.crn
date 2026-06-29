@@ -1,0 +1,25 @@
+cairn: "1.0"
+
+loop:
+  id: retry-recovery
+  name: Retry Recovery
+  version: 0.2.0
+  runtime:
+    circuit_breaker_max_failures: 2
+  outputs:
+    recovered:
+      value: ${{ states.flaky.outputs.recovered }}
+    attempt:
+      value: ${{ states.flaky.outputs.attempt }}
+  budget:
+    max_iterations: 2
+    max_duration: 30s
+  states:
+    - id: flaky
+      handler: core.flaky
+      guard:
+        retry: 2
+        backoff: exponential
+      inputs:
+        fail_until_attempt: 1
+        message: transient failure

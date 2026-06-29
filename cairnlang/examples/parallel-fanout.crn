@@ -1,0 +1,30 @@
+cairn: "1.0"
+
+loop:
+  id: parallel-fanout
+  name: Parallel Fanout
+  version: 0.3.0
+  outputs:
+    first:
+      value: ${{ states.branch_one.outputs.value }}
+    second:
+      value: ${{ states.branch_two.outputs.value }}
+  budget:
+    max_iterations: 4
+    max_duration: 30s
+  states:
+    - id: start
+      handler: core.collect
+      parallel:
+        - branch_one
+        - branch_two
+      inputs:
+        ready: true
+    - id: branch_one
+      handler: core.collect
+      inputs:
+        value: alpha
+    - id: branch_two
+      handler: core.collect
+      inputs:
+        value: beta
