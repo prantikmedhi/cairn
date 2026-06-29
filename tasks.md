@@ -27,7 +27,7 @@ This backlog is ordered to support fast MVP progress.
 - [x] Build CLI `init` command for scaffolding new loops
 - [x] Add unit tests for parser and validator
 - [x] Add integration tests for example loop execution
-- [ ] Write contributor setup instructions
+- [x] Write contributor setup instructions
 
 ## Later
 
