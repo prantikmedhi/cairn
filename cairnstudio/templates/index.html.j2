@@ -3,22 +3,22 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="description" content="CairnStudio — Visual agent loop engineering IDE. Drag-and-drop editor for building, validating, and previewing AI agent loops in the Cairn DSL (.crn format).">
-    <meta name="keywords" content="agent loop editor, visual loop engineering, CairnStudio, agent loop IDE, AI agent builder, drag and drop agent, loop engineering">
+    <meta name="description" content="CairnStudio — Visual agent loop engineering IDE. Build, validate, and collaborate on AI agent loops in a code-editor style workspace.">
+    <meta name="keywords" content="CairnStudio, agent loop IDE, visual loop editor, agent loop engineering, AI workflow editor, collaborative loop builder">
     <meta name="robots" content="index, follow">
     <link rel="canonical" href="https://prantikmedhi.github.io/cairn/studio">
     <meta property="og:type" content="website">
     <meta property="og:title" content="CairnStudio — Visual Agent Loop Engineering IDE">
-    <meta property="og:description" content="Build agent loops visually with drag-and-drop. Real-time validation, trace replay, and YAML export for the Cairn DSL.">
+    <meta property="og:description" content="Code-editor style workspace for building, validating, previewing, and collaborating on Cairn loops.">
     <meta property="og:url" content="https://prantikmedhi.github.io/cairn/studio">
     <meta property="og:site_name" content="Cairn">
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:title" content="CairnStudio — Visual Agent Loop Engineering IDE">
-    <meta name="twitter:description" content="Build agent loops visually with drag-and-drop. Real-time validation, trace replay, and YAML export for the Cairn DSL.">
+    <meta name="twitter:description" content="Code-editor style workspace for building, validating, previewing, and collaborating on Cairn loops.">
     <title>{{ page_title }} — Visual Agent Loop Engineering IDE</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
     <script type="application/ld+json">
     {
       "@context": "https://schema.org",
@@ -26,7 +26,7 @@
       "name": "CairnStudio",
       "applicationCategory": "DeveloperApplication",
       "operatingSystem": "macOS, Linux, Windows",
-      "description": "Visual agent loop engineering IDE for the Cairn DSL. Build, validate, and preview AI agent loops with drag-and-drop.",
+      "description": "Visual agent loop engineering IDE for the Cairn DSL. Build, validate, preview, and collaborate on AI agent loops.",
       "url": "https://github.com/prantikmedhi/cairn",
       "version": "0.1.0",
       "author": {
@@ -37,348 +37,1116 @@
     </script>
     <style>
       :root {
-        --bg: #fafafa;
-        --panel: rgba(255,255,255,0.88);
-        --ink: #09090b;
-        --muted: #52525b;
-        --line: #d4d4d8;
-        --accent: #ec4899;
-        --accent-soft: rgba(236,72,153,0.12);
-        --shadow: 0 18px 40px rgba(24,24,27,0.08);
+        --bg: #0f172a;
+        --panel: #111c34;
+        --panel-2: #152342;
+        --panel-3: #0b1426;
+        --ink: #f8fafc;
+        --muted: #94a3b8;
+        --line: rgba(148, 163, 184, 0.14);
+        --line-strong: rgba(148, 163, 184, 0.26);
+        --accent: #22c55e;
+        --accent-2: #38bdf8;
+        --accent-soft: rgba(34, 197, 94, 0.12);
+        --warning: #f59e0b;
+        --danger: #fb7185;
+        --shadow: 0 20px 48px rgba(2, 6, 23, 0.32);
+        --font-ui: "IBM Plex Sans", sans-serif;
+        --font-code: "JetBrains Mono", monospace;
       }
+
+      body[data-theme="aurora"] {
+        --bg: #0b1020;
+        --panel: #121830;
+        --panel-2: #171f3d;
+        --panel-3: #0e1427;
+        --ink: #eef2ff;
+        --muted: #a5b4fc;
+        --line: rgba(165, 180, 252, 0.16);
+        --line-strong: rgba(165, 180, 252, 0.3);
+        --accent: #f97316;
+        --accent-2: #8b5cf6;
+        --accent-soft: rgba(249, 115, 22, 0.12);
+      }
+
+      body[data-theme="paper"] {
+        --bg: #f8fafc;
+        --panel: #ffffff;
+        --panel-2: #f8fafc;
+        --panel-3: #eef2f7;
+        --ink: #0f172a;
+        --muted: #475569;
+        --line: rgba(15, 23, 42, 0.1);
+        --line-strong: rgba(15, 23, 42, 0.18);
+        --accent: #0f766e;
+        --accent-2: #0ea5e9;
+        --accent-soft: rgba(14, 165, 233, 0.1);
+        --shadow: 0 20px 44px rgba(15, 23, 42, 0.08);
+      }
+
       * { box-sizing: border-box; }
+
+      html {
+        scroll-behavior: smooth;
+      }
+
       body {
         margin: 0;
-        font-family: "DM Sans", sans-serif;
+        min-height: 100vh;
+        font-family: var(--font-ui);
         color: var(--ink);
         background:
-          radial-gradient(circle at top left, rgba(236,72,153,0.14), transparent 28%),
-          radial-gradient(circle at top right, rgba(24,24,27,0.08), transparent 26%),
-          linear-gradient(180deg, #ffffff 0%, #fafafa 48%, #f4f4f5 100%);
+          radial-gradient(circle at top left, rgba(56, 189, 248, 0.12), transparent 24%),
+          radial-gradient(circle at top right, rgba(34, 197, 94, 0.12), transparent 24%),
+          var(--bg);
       }
+
       .skip-link {
         position: absolute;
         left: 12px;
         top: -48px;
-        background: #fff;
-        color: #000;
+        z-index: 1000;
         padding: 10px 14px;
         border-radius: 12px;
-        z-index: 1000;
+        background: #fff;
+        color: #000;
       }
-      .skip-link:focus { top: 12px; outline: 3px solid var(--accent); }
-      .shell {
+
+      .skip-link:focus {
+        top: 12px;
+        outline: 3px solid rgba(56, 189, 248, 0.28);
+      }
+
+      .ide {
         display: grid;
-        grid-template-columns: 280px minmax(480px, 1fr) 360px;
-        gap: 18px;
+        grid-template-columns: 68px 312px minmax(560px, 1fr) 360px;
         min-height: 100vh;
+      }
+
+      .activity-bar,
+      .sidebar,
+      .editor-shell,
+      .utility-dock {
+        min-height: 100vh;
+      }
+
+      .activity-bar {
+        display: grid;
+        grid-template-rows: auto 1fr auto;
+        gap: 18px;
+        padding: 18px 12px 14px;
+        background: var(--panel-3);
+        border-right: 1px solid var(--line);
+      }
+
+      .sidebar {
+        display: grid;
+        grid-template-rows: auto 1fr auto;
+        gap: 18px;
         padding: 18px;
-      }
-      .panel {
         background: var(--panel);
-        backdrop-filter: blur(14px);
-        border: 1px solid rgba(255,255,255,0.85);
-        box-shadow: var(--shadow);
-        border-radius: 24px;
+        border-right: 1px solid var(--line);
       }
-      .rail, .inspector, .workspace { padding: 20px; }
-      .eyebrow {
+
+      .editor-shell {
+        display: grid;
+        grid-template-rows: auto auto 1fr auto;
+        background: linear-gradient(180deg, var(--panel-2), var(--bg));
+      }
+
+      .utility-dock {
+        display: grid;
+        grid-template-rows: minmax(320px, 1fr) minmax(280px, 0.9fr);
+        gap: 1px;
+        background: var(--line);
+      }
+
+      .dock-panel {
+        background: var(--panel);
+        padding: 18px;
+        display: grid;
+        gap: 14px;
+      }
+
+      .brand-button,
+      .activity-button,
+      .action-button,
+      .tab-button,
+      .ghost-button,
+      .send-button {
+        cursor: pointer;
+        font: inherit;
+        transition: transform 180ms ease, background 180ms ease, border-color 180ms ease, color 180ms ease, box-shadow 180ms ease;
+      }
+
+      .brand-button,
+      .activity-button {
+        display: grid;
+        place-items: center;
+        width: 44px;
+        height: 44px;
+        margin: 0 auto;
+        border-radius: 14px;
+        border: 1px solid transparent;
+        background: transparent;
+        color: var(--muted);
+      }
+
+      .brand-button {
+        background: linear-gradient(135deg, var(--accent-soft), rgba(56, 189, 248, 0.08));
+        border-color: var(--line);
+        color: var(--accent-2);
+      }
+
+      .activity-button:hover,
+      .activity-button:focus-visible,
+      .brand-button:focus-visible,
+      .brand-button:hover {
+        transform: translateY(-1px);
+        border-color: var(--line-strong);
+        outline: none;
+      }
+
+      .activity-button.active {
+        background: var(--accent-soft);
+        color: var(--accent);
+        border-color: rgba(34, 197, 94, 0.24);
+        box-shadow: inset 0 0 0 1px rgba(34, 197, 94, 0.08);
+      }
+
+      .activity-stack {
+        display: grid;
+        gap: 10px;
+        align-content: start;
+      }
+
+      .icon {
+        width: 20px;
+        height: 20px;
+        stroke: currentColor;
+        stroke-width: 1.9;
+        fill: none;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+      }
+
+      .brand {
+        display: grid;
+        gap: 10px;
+      }
+
+      .brand h1,
+      .panel-title,
+      .editor-title,
+      .dock-title {
+        margin: 0;
+        letter-spacing: -0.03em;
+      }
+
+      .brand h1 {
+        font-size: 24px;
+      }
+
+      .phase-chip,
+      .room-chip,
+      .meta-chip,
+      .status-pill {
         display: inline-flex;
         align-items: center;
-        gap: 10px;
-        padding: 8px 12px;
+        gap: 8px;
+        width: fit-content;
+        padding: 7px 10px;
         border-radius: 999px;
         background: var(--accent-soft);
         color: var(--accent);
-        font-size: 13px;
+        font-size: 12px;
         font-weight: 700;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
       }
-      h1, h2, h3 {
-        font-family: "Space Grotesk", sans-serif;
-        margin: 0;
-        letter-spacing: -0.04em;
+
+      .brand p,
+      .panel-copy,
+      .helper-copy,
+      .trace-meta,
+      .status-copy,
+      .tree-meta,
+      .collab-copy {
+        color: var(--muted);
       }
-      h1 { font-size: clamp(28px, 3vw, 42px); margin-top: 18px; }
-      p { color: var(--muted); line-height: 1.55; }
-      .palette {
+
+      .sidebar-panel {
+        display: none;
+        gap: 16px;
+        align-content: start;
+      }
+
+      .sidebar-panel.active {
         display: grid;
-        gap: 12px;
-        margin-top: 22px;
       }
-      .collab-pane {
+
+      .section-label {
+        font-size: 12px;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: var(--muted);
+      }
+
+      .tree-list,
+      .tool-list,
+      .presence-list,
+      .activity-list,
+      .trace-list {
         display: grid;
+        gap: 10px;
+      }
+
+      .tree-item,
+      .tool-card,
+      .presence-card,
+      .activity-card,
+      .trace-card,
+      .setting-card {
+        padding: 14px;
+        border-radius: 16px;
+        background: rgba(255, 255, 255, 0.03);
+        border: 1px solid var(--line);
+      }
+
+      body[data-theme="paper"] .tree-item,
+      body[data-theme="paper"] .tool-card,
+      body[data-theme="paper"] .presence-card,
+      body[data-theme="paper"] .activity-card,
+      body[data-theme="paper"] .trace-card,
+      body[data-theme="paper"] .setting-card {
+        background: rgba(255, 255, 255, 0.72);
+      }
+
+      .tree-item {
+        cursor: pointer;
+      }
+
+      .tree-item:hover,
+      .tree-item:focus-visible,
+      .tool-card:hover,
+      .tool-card:focus-visible {
+        transform: translateY(-1px);
+        border-color: var(--line-strong);
+        outline: none;
+      }
+
+      .tree-item.active {
+        border-color: rgba(56, 189, 248, 0.34);
+        background: rgba(56, 189, 248, 0.08);
+      }
+
+      .tree-row,
+      .tool-row,
+      .meta-row,
+      .title-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
         gap: 12px;
-        margin-top: 22px;
-        padding-top: 18px;
+      }
+
+      .tool-card {
+        display: grid;
+        gap: 10px;
+      }
+
+      .tool-card strong,
+      .tree-item strong,
+      .trace-card strong,
+      .activity-card strong,
+      .presence-card strong {
+        font-size: 15px;
+      }
+
+      .tool-card .ghost-button,
+      .tree-item .ghost-button {
+        width: 100%;
+      }
+
+      .sidebar-footer,
+      .status-bar {
+        padding-top: 14px;
         border-top: 1px solid var(--line);
       }
-      .collab-list, .activity-list {
+
+      .meta-stack,
+      .input-stack,
+      .setting-stack {
+        display: grid;
+        gap: 12px;
+      }
+
+      input,
+      textarea,
+      select,
+      button {
+        font: inherit;
+      }
+
+      input,
+      textarea,
+      select {
+        width: 100%;
+        padding: 12px 14px;
+        border-radius: 14px;
+        border: 1px solid var(--line);
+        background: rgba(255, 255, 255, 0.02);
+        color: var(--ink);
+      }
+
+      body[data-theme="paper"] input,
+      body[data-theme="paper"] textarea,
+      body[data-theme="paper"] select {
+        background: rgba(255, 255, 255, 0.84);
+      }
+
+      input:focus,
+      textarea:focus,
+      select:focus {
+        outline: 3px solid rgba(56, 189, 248, 0.22);
+        border-color: rgba(56, 189, 248, 0.38);
+      }
+
+      textarea {
+        min-height: 150px;
+        resize: vertical;
+      }
+
+      #yamlEditor {
+        min-height: 100%;
+        height: calc(100vh - 250px);
+        border-radius: 18px;
+        padding: 18px;
+        font-family: var(--font-code);
+        font-size: 13px;
+        line-height: 1.7;
+        background: rgba(2, 6, 23, 0.28);
+      }
+
+      body[data-theme="paper"] #yamlEditor {
+        background: rgba(255, 255, 255, 0.86);
+      }
+
+      .ghost-button,
+      .send-button,
+      .action-button,
+      .tab-button {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        min-height: 40px;
+        padding: 0 14px;
+        border-radius: 12px;
+        border: 1px solid var(--line);
+        background: rgba(255, 255, 255, 0.04);
+        color: var(--ink);
+      }
+
+      .action-button.primary,
+      .send-button {
+        background: linear-gradient(135deg, var(--accent), var(--accent-2));
+        color: #04111c;
+        border-color: transparent;
+        font-weight: 700;
+      }
+
+      .action-button.primary:hover,
+      .send-button:hover,
+      .ghost-button:hover,
+      .tab-button:hover,
+      .action-button:hover,
+      .action-button:focus-visible,
+      .send-button:focus-visible,
+      .ghost-button:focus-visible,
+      .tab-button:focus-visible {
+        transform: translateY(-1px);
+        outline: none;
+      }
+
+      .editor-topbar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 18px;
+        padding: 18px 22px 16px;
+        border-bottom: 1px solid var(--line);
+        background: rgba(255, 255, 255, 0.02);
+      }
+
+      .editor-title-group {
         display: grid;
         gap: 8px;
       }
-      .collab-card, .activity-card {
-        padding: 12px 14px;
-        border-radius: 16px;
-        background: #fff;
-        border: 1px solid rgba(24,24,27,0.08);
+
+      .editor-title {
+        font-size: 20px;
       }
-      .activity-card p, .collab-card p { margin: 6px 0 0; }
-      .palette-card {
-        cursor: pointer;
-        border: 1px solid var(--line);
-        background: #fff;
-        padding: 14px;
-        border-radius: 18px;
-        transition: border-color 180ms ease, transform 180ms ease, box-shadow 180ms ease;
+
+      .breadcrumbs {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        flex-wrap: wrap;
+        color: var(--muted);
+        font-size: 13px;
       }
-      .palette-card:hover, .palette-card:focus-visible {
-        border-color: var(--accent);
-        box-shadow: 0 12px 24px rgba(236,72,153,0.12);
-        transform: translateY(-2px);
-        outline: none;
+
+      .breadcrumbs code {
+        font-family: var(--font-code);
+        font-size: 12px;
       }
-      .workspace {
+
+      .editor-toolbar,
+      .toolbar-group,
+      .tab-row,
+      .status-row {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        flex-wrap: wrap;
+      }
+
+      .tab-row {
+        padding: 14px 22px 0;
+        border-bottom: 1px solid var(--line);
+      }
+
+      .tab-button {
+        border-bottom-left-radius: 0;
+        border-bottom-right-radius: 0;
+        min-height: 42px;
+      }
+
+      .tab-button.active {
+        background: rgba(255, 255, 255, 0.08);
+        border-color: var(--line-strong);
+        color: var(--accent-2);
+      }
+
+      .editor-content {
         display: grid;
-        grid-template-rows: auto 1fr auto;
+        min-height: 0;
+      }
+
+      .editor-view {
+        display: none;
+        padding: 18px 22px 18px;
+        min-height: calc(100vh - 210px);
+      }
+
+      .editor-view.active {
+        display: block;
+      }
+
+      .graph-layout,
+      .preview-layout {
+        display: grid;
         gap: 16px;
       }
-      .workspace-top {
+
+      .graph-layout {
+        grid-template-columns: 1fr 280px;
+        min-height: calc(100vh - 260px);
+      }
+
+      .canvas-wrap,
+      .preview-panel,
+      .preview-sidebar {
+        background: rgba(255, 255, 255, 0.03);
+        border: 1px solid var(--line);
+        border-radius: 18px;
+        overflow: hidden;
+      }
+
+      .canvas-wrap {
+        display: grid;
+        grid-template-rows: auto 1fr;
+      }
+
+      .canvas-header,
+      .preview-header {
         display: flex;
-        flex-wrap: wrap;
+        align-items: center;
         justify-content: space-between;
         gap: 12px;
-        align-items: center;
+        padding: 14px 16px;
+        border-bottom: 1px solid var(--line);
       }
-      .button-row {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 10px;
-      }
-      button, .file-button {
-        cursor: pointer;
-        border: none;
-        border-radius: 14px;
-        padding: 12px 16px;
-        font: inherit;
-        font-weight: 700;
-        transition: transform 180ms ease, opacity 180ms ease, box-shadow 180ms ease;
-      }
-      button:hover, button:focus-visible, .file-button:hover, .file-button:focus-visible {
-        transform: translateY(-1px);
-        outline: 3px solid rgba(236,72,153,0.24);
-      }
-      .primary { background: var(--ink); color: #fff; }
-      .accent { background: var(--accent); color: #fff; }
-      .ghost { background: #fff; color: var(--ink); border: 1px solid var(--line); }
-      .canvas-shell {
-        display: grid;
-        grid-template-columns: 1fr 340px;
-        gap: 16px;
-        min-height: 540px;
-      }
+
       .canvas {
         position: relative;
+        min-height: 520px;
         overflow: hidden;
-        border-radius: 22px;
-        border: 1px solid var(--line);
         background:
-          linear-gradient(90deg, rgba(63,63,70,0.06) 1px, transparent 1px) 0 0/36px 36px,
-          linear-gradient(rgba(63,63,70,0.06) 1px, transparent 1px) 0 0/36px 36px,
-          linear-gradient(180deg, #fff 0%, #fdf2f8 100%);
+          linear-gradient(90deg, rgba(148, 163, 184, 0.08) 1px, transparent 1px) 0 0/28px 28px,
+          linear-gradient(rgba(148, 163, 184, 0.08) 1px, transparent 1px) 0 0/28px 28px,
+          linear-gradient(180deg, rgba(56, 189, 248, 0.04), rgba(15, 23, 42, 0.04));
       }
+
       .canvas.empty::before {
-        content: "Drag blocks here to build loop";
+        content: "Drop states here to compose loop visually";
         position: absolute;
         inset: 0;
         display: grid;
         place-items: center;
         color: var(--muted);
-        font-weight: 700;
+        font-weight: 600;
         letter-spacing: 0.02em;
       }
+
       .node {
         position: absolute;
-        width: 210px;
-        border-radius: 18px;
-        background: rgba(255,255,255,0.96);
-        border: 1px solid rgba(24,24,27,0.08);
-        box-shadow: 0 18px 28px rgba(24,24,27,0.08);
+        width: 216px;
         padding: 14px;
+        border-radius: 16px;
+        border: 1px solid var(--line);
+        background: rgba(255, 255, 255, 0.06);
+        backdrop-filter: blur(8px);
+        box-shadow: 0 18px 30px rgba(2, 6, 23, 0.18);
         cursor: move;
       }
-      .node.active { border-color: var(--accent); box-shadow: 0 18px 30px rgba(236,72,153,0.18); }
+
+      body[data-theme="paper"] .node {
+        background: rgba(255, 255, 255, 0.92);
+      }
+
+      .node.active {
+        border-color: rgba(34, 197, 94, 0.34);
+        box-shadow: 0 18px 30px rgba(34, 197, 94, 0.12);
+      }
+
       .node header {
         display: flex;
-        justify-content: space-between;
         align-items: center;
+        justify-content: space-between;
         gap: 12px;
         margin-bottom: 8px;
       }
-      .node-title { font-family: "Space Grotesk", sans-serif; font-size: 16px; font-weight: 700; }
-      .chip {
-        display: inline-flex;
-        align-items: center;
-        padding: 6px 10px;
-        border-radius: 999px;
-        background: rgba(24,24,27,0.06);
-        color: var(--muted);
-        font-size: 12px;
+
+      .node-title {
+        font-size: 15px;
         font-weight: 700;
       }
-      .mini-list {
+
+      .node-kind {
+        padding: 5px 8px;
+        border-radius: 999px;
+        background: rgba(56, 189, 248, 0.12);
+        color: var(--accent-2);
+        font-size: 11px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+      }
+
+      .node-meta,
+      .transition-list,
+      .preview-summary,
+      .status-note,
+      .status-bar {
+        color: var(--muted);
+      }
+
+      .transition-list {
         display: flex;
         flex-wrap: wrap;
         gap: 6px;
-        margin-top: 8px;
+        margin-top: 10px;
       }
-      .yaml-pane, .trace-pane {
+
+      .transition-pill {
+        padding: 5px 8px;
+        border-radius: 999px;
+        background: rgba(255, 255, 255, 0.06);
         border: 1px solid var(--line);
-        border-radius: 20px;
-        background: #fff;
-        padding: 14px;
+        font-size: 11px;
+        font-family: var(--font-code);
       }
-      textarea, input, select {
-        width: 100%;
-        font: inherit;
+
+      .graph-sidebar {
+        display: grid;
+        gap: 16px;
+      }
+
+      .mini-panel {
+        padding: 16px;
+        border-radius: 18px;
+        border: 1px solid var(--line);
+        background: rgba(255, 255, 255, 0.03);
+      }
+
+      .mini-panel h3 {
+        font-size: 15px;
+        margin-bottom: 8px;
+      }
+
+      .preview-layout {
+        grid-template-columns: 320px 1fr;
+      }
+
+      .preview-sidebar,
+      .preview-panel {
+        padding: 16px;
+      }
+
+      .trace-list {
+        margin-top: 12px;
+      }
+
+      .trace-card.active {
+        border-color: rgba(56, 189, 248, 0.34);
+        background: rgba(56, 189, 248, 0.08);
+      }
+
+      .inspector-form,
+      .collab-form {
+        display: grid;
+        gap: 12px;
+      }
+
+      .label {
+        font-size: 12px;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: var(--muted);
+      }
+
+      .status-card {
         padding: 12px 14px;
         border-radius: 14px;
         border: 1px solid var(--line);
-        background: #fff;
+        background: rgba(255, 255, 255, 0.04);
+      }
+
+      .status-card.ok {
+        border-color: rgba(34, 197, 94, 0.3);
+        background: rgba(34, 197, 94, 0.08);
         color: var(--ink);
       }
-      textarea:focus, input:focus, select:focus {
-        outline: 3px solid rgba(236,72,153,0.24);
-        border-color: var(--accent);
+
+      .status-card.error {
+        border-color: rgba(251, 113, 133, 0.28);
+        background: rgba(251, 113, 133, 0.08);
+        color: var(--ink);
       }
-      textarea { min-height: 220px; resize: vertical; }
-      #commentInput { min-height: 110px; }
-      .stack { display: grid; gap: 12px; }
-      .label { font-size: 13px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; }
-      .trace-step {
-        padding: 12px 14px;
-        border-radius: 14px;
-        background: #fff;
-        border: 1px solid rgba(24,24,27,0.08);
+
+      #commentInput {
+        min-height: 110px;
       }
-      .trace-step.active {
-        border-color: var(--accent);
-        background: rgba(236,72,153,0.08);
+
+      .status-bar {
+        padding: 10px 18px;
+        border-top: 1px solid var(--line);
+        background: rgba(255, 255, 255, 0.03);
+        font-size: 12px;
       }
-      .status {
-        padding: 12px 14px;
-        border-radius: 16px;
-        background: rgba(24,24,27,0.04);
-        color: var(--muted);
+
+      .status-row {
+        justify-content: space-between;
       }
-      .status.error {
-        background: rgba(239,68,68,0.08);
-        color: #991b1b;
+
+      .status-row code {
+        font-family: var(--font-code);
+        font-size: 11px;
       }
-      .status.ok {
-        background: rgba(34,197,94,0.08);
-        color: #166534;
+
+      [hidden] {
+        display: none !important;
       }
-      .footer-note {
-        color: var(--muted);
-        font-size: 13px;
+
+      @media (max-width: 1480px) {
+        .ide {
+          grid-template-columns: 68px 280px minmax(420px, 1fr) 320px;
+        }
       }
+
       @media (max-width: 1280px) {
-        .shell { grid-template-columns: 1fr; }
-        .canvas-shell { grid-template-columns: 1fr; }
+        .ide {
+          grid-template-columns: 68px 300px 1fr;
+        }
+
+        .utility-dock {
+          grid-column: 2 / span 2;
+          grid-template-columns: 1fr 1fr;
+          grid-template-rows: none;
+          min-height: auto;
+        }
+
+        .graph-layout,
+        .preview-layout {
+          grid-template-columns: 1fr;
+        }
       }
+
+      @media (max-width: 980px) {
+        .ide {
+          grid-template-columns: 1fr;
+        }
+
+        .activity-bar {
+          grid-template-rows: none;
+          grid-template-columns: auto 1fr auto;
+          min-height: auto;
+          border-right: none;
+          border-bottom: 1px solid var(--line);
+        }
+
+        .activity-stack {
+          grid-auto-flow: column;
+          justify-content: start;
+        }
+
+        .sidebar,
+        .editor-shell,
+        .utility-dock {
+          min-height: auto;
+        }
+
+        .sidebar {
+          border-right: none;
+          border-bottom: 1px solid var(--line);
+        }
+
+        .utility-dock {
+          grid-column: auto;
+          grid-template-columns: 1fr;
+        }
+
+        .editor-topbar,
+        .tab-row,
+        .editor-view {
+          padding-left: 16px;
+          padding-right: 16px;
+        }
+
+        #yamlEditor {
+          height: 420px;
+        }
+      }
+
       @media (prefers-reduced-motion: reduce) {
-        *, *::before, *::after { transition: none !important; animation: none !important; }
+        * {
+          transition: none !important;
+          animation: none !important;
+        }
       }
     </style>
   </head>
-  <body>
-    <a class="skip-link" href="#studio">Skip to editor</a>
-    <main class="shell" id="studio">
-      <aside class="panel rail" aria-label="Palette and project info">
-        <span class="eyebrow">{{ phase_badge }}</span>
-        <h1>{{ page_title }}</h1>
-        <p>Build agent loops visually, validate in real time, preview traces, and export `.crn` without touching raw YAML unless you want to.</p>
-        <div class="status">{{ collaboration_status }}</div>
-        <div class="palette" role="list" aria-label="State palette">
-          <button class="palette-card ghost" draggable="true" data-kind="state" data-handler="core.collect">Collect state</button>
-          <button class="palette-card ghost" draggable="true" data-kind="state" data-handler="core.template">Template state</button>
-          <button class="palette-card ghost" draggable="true" data-kind="state" data-handler="core.condition">Condition state</button>
-          <button class="palette-card ghost" draggable="true" data-kind="subloop" data-handler="">Sub-loop state</button>
+  <body data-theme="midnight">
+    <a class="skip-link" href="#workspace">Skip to editor</a>
+    <main class="ide" id="workspace">
+      <aside class="activity-bar" aria-label="Primary navigation">
+        <button class="brand-button" type="button" title="CairnStudio home" aria-label="CairnStudio home">
+          <svg class="icon" viewBox="0 0 24 24">
+            <path d="M12 3a9 9 0 1 0 8.6 11.7"></path>
+            <path d="M14.8 3.7H21v6.2"></path>
+            <path d="M21 3l-8 8"></path>
+          </svg>
+        </button>
+
+        <div class="activity-stack" role="tablist" aria-label="Sidebar panels">
+          <button class="activity-button active" type="button" data-sidebar="explorer" title="Explorer" aria-label="Explorer">
+            <svg class="icon" viewBox="0 0 24 24">
+              <path d="M4 5h7l2 2h7v12H4z"></path>
+              <path d="M4 9h16"></path>
+            </svg>
+          </button>
+          <button class="activity-button" type="button" data-sidebar="library" title="Library" aria-label="Library">
+            <svg class="icon" viewBox="0 0 24 24">
+              <path d="M5 4h4v16H5z"></path>
+              <path d="M10 4h4v16h-4z"></path>
+              <path d="M15 4h4v16h-4z"></path>
+            </svg>
+          </button>
+          <button class="activity-button" type="button" data-sidebar="settings" title="Settings" aria-label="Settings">
+            <svg class="icon" viewBox="0 0 24 24">
+              <path d="m12 3 1.7 3.4 3.8.6-2.7 2.7.6 3.8-3.4-1.7-3.4 1.7.6-3.8L6.5 7l3.8-.6Z"></path>
+              <circle cx="12" cy="12" r="2.8"></circle>
+            </svg>
+          </button>
         </div>
-        <div class="collab-pane">
-          <div class="label">Collaboration</div>
-          <input id="collaboratorName" aria-label="Collaborator name" placeholder="Your name">
-          <input id="shareSession" aria-label="Share session link" readonly>
-          <div id="presenceList" class="collab-list">
-            <div class="status">No collaborators active yet.</div>
-          </div>
-          <textarea id="commentInput" aria-label="Comment message" placeholder="Leave handoff note or review comment"></textarea>
-          <button class="accent" id="sendComment">Send comment</button>
-        </div>
+
+        <button class="activity-button" type="button" id="shareSessionButton" title="Copy share link" aria-label="Copy share link">
+          <svg class="icon" viewBox="0 0 24 24">
+            <path d="M8 12a4 4 0 0 1 4-4h4"></path>
+            <path d="M16 12a4 4 0 0 1-4 4H8"></path>
+            <path d="M9 15 5 19"></path>
+            <path d="M15 9 19 5"></path>
+          </svg>
+        </button>
       </aside>
 
-      <section class="panel workspace">
-        <div class="workspace-top">
+      <aside class="sidebar" aria-label="Navigation sidebar">
+        <div class="brand">
+          <span class="phase-chip">{{ phase_badge }}</span>
+          <h1>{{ page_title }}</h1>
+          <p class="panel-copy">Code-editor style workspace for visual loop authoring, YAML editing, live preview, and shared collaboration.</p>
+          <span class="room-chip">{{ collaboration_status }}</span>
+        </div>
+
+        <section class="sidebar-panel active" data-panel="explorer">
           <div>
-            <h2>Canvas + Source</h2>
-            <p>Canvas stays source-of-truth for non-dev flow. YAML stays visible and exportable for dev handoff.</p>
+            <div class="section-label">Loop Explorer</div>
+            <div class="panel-copy">Navigate loop metadata and states like a project tree.</div>
           </div>
-          <div class="button-row">
-            <button class="ghost" id="syncFromYaml">Import YAML to canvas</button>
-            <button class="ghost" id="downloadYaml">Export .crn</button>
-            <label class="file-button ghost" for="uploadYaml">Import .crn</label>
+          <div class="meta-stack">
+            <div class="tree-item">
+              <div class="tree-row"><strong>loop.crn</strong><span class="meta-chip" id="loopVersionChip">0.1.0</span></div>
+              <div class="tree-meta" id="loopSummary">Visual starter loop</div>
+            </div>
+            <div class="tree-list" id="treeList">
+              <div class="status-card">No states loaded yet.</div>
+            </div>
+          </div>
+          <div class="sidebar-footer meta-stack">
+            <div>
+              <div class="section-label">Session</div>
+              <div class="status-copy"><code id="sessionLabel">{{ default_session_id }}</code></div>
+            </div>
+            <input id="shareSession" aria-label="Share session link" readonly>
+          </div>
+        </section>
+
+        <section class="sidebar-panel" data-panel="library">
+          <div>
+            <div class="section-label">State Library</div>
+            <div class="panel-copy">Insert building blocks, then arrange flow visually or refine in YAML.</div>
+          </div>
+          <div class="tool-list" role="list" aria-label="State palette">
+            <button class="tool-card palette-card" type="button" draggable="true" data-kind="state" data-handler="core.collect">
+              <div class="tool-row">
+                <strong>Collect</strong>
+                <span class="meta-chip">output</span>
+              </div>
+              <div class="helper-copy">Capture and forward structured values.</div>
+            </button>
+            <button class="tool-card palette-card" type="button" draggable="true" data-kind="state" data-handler="core.template">
+              <div class="tool-row">
+                <strong>Template</strong>
+                <span class="meta-chip">transform</span>
+              </div>
+              <div class="helper-copy">Compose prompts and derived values from context.</div>
+            </button>
+            <button class="tool-card palette-card" type="button" draggable="true" data-kind="state" data-handler="core.condition">
+              <div class="tool-row">
+                <strong>Condition</strong>
+                <span class="meta-chip">branch</span>
+              </div>
+              <div class="helper-copy">Drive branching decisions using expressions.</div>
+            </button>
+            <button class="tool-card palette-card" type="button" draggable="true" data-kind="subloop" data-handler="">
+              <div class="tool-row">
+                <strong>Sub-loop</strong>
+                <span class="meta-chip">compose</span>
+              </div>
+              <div class="helper-copy">Reference imported loops as reusable stages.</div>
+            </button>
+          </div>
+          <div class="sidebar-footer meta-stack">
+            <label class="ghost-button" for="uploadYaml">Import .crn</label>
             <input hidden id="uploadYaml" type="file" accept=".crn,.cairn,.yaml,.yml">
+            <button class="ghost-button" type="button" id="downloadYaml">Export .crn</button>
           </div>
+        </section>
+
+        <section class="sidebar-panel" data-panel="settings">
+          <div>
+            <div class="section-label">Workspace Settings</div>
+            <div class="panel-copy">Tune theme, sync behavior, and default preview target.</div>
+          </div>
+          <div class="setting-stack">
+            <div class="setting-card">
+              <label class="label" for="themeSelect">Theme</label>
+              <select id="themeSelect" aria-label="Theme">
+                <option value="midnight">Midnight</option>
+                <option value="aurora">Aurora</option>
+                <option value="paper">Paper</option>
+              </select>
+            </div>
+            <div class="setting-card">
+              <label class="label" for="targetSelect">Default Preview Target</label>
+              <select id="targetSelect" aria-label="Execution target">
+                {% for target in available_targets %}
+                <option value="{{ target }}">{{ target }}</option>
+                {% endfor %}
+              </select>
+            </div>
+            <div class="setting-card">
+              <label class="label" for="autoSyncToggle">Follow Remote Session</label>
+              <select id="autoSyncToggle" aria-label="Remote sync mode">
+                <option value="on">On</option>
+                <option value="off">Off</option>
+              </select>
+            </div>
+          </div>
+        </section>
+      </aside>
+
+      <section class="editor-shell">
+        <header class="editor-topbar">
+          <div class="editor-title-group">
+            <div class="breadcrumbs">
+              <span>CairnStudio</span>
+              <span>/</span>
+              <span>sessions</span>
+              <span>/</span>
+              <code id="breadcrumbSession">{{ default_session_id }}</code>
+            </div>
+            <h2 class="editor-title">Loop Workspace</h2>
+          </div>
+          <div class="editor-toolbar">
+            <div class="toolbar-group">
+              <button class="action-button" type="button" id="syncFromYaml">
+                <svg class="icon" viewBox="0 0 24 24"><path d="M21 12a9 9 0 0 1-15.5 6.2"></path><path d="M3 12A9 9 0 0 1 18.5 5.8"></path><path d="M3 16v-4h4"></path><path d="M21 8v4h-4"></path></svg>
+                Sync from YAML
+              </button>
+              <button class="action-button primary" type="button" id="validateYaml">
+                <svg class="icon" viewBox="0 0 24 24"><path d="m5 12 4 4L19 6"></path></svg>
+                Validate
+              </button>
+              <button class="action-button" type="button" id="previewLoop">
+                <svg class="icon" viewBox="0 0 24 24"><path d="m8 5 11 7-11 7z"></path></svg>
+                Preview
+              </button>
+            </div>
+          </div>
+        </header>
+
+        <div class="tab-row" role="tablist" aria-label="Editor views">
+          <button class="tab-button active" type="button" data-view="graph">Graph</button>
+          <button class="tab-button" type="button" data-view="yaml">YAML</button>
+          <button class="tab-button" type="button" data-view="preview">Preview</button>
         </div>
 
-        <div class="canvas-shell">
-          <div class="canvas empty" id="canvas" aria-label="Loop canvas"></div>
-          <div class="stack">
-            <div class="yaml-pane stack">
-              <div class="label">YAML</div>
-              <textarea id="yamlEditor" aria-label="Loop YAML">{{ starter_yaml }}</textarea>
-              <div class="button-row">
-                <button class="primary" id="validateYaml">Validate</button>
-                <button class="accent" id="previewLoop">Preview run</button>
+        <div class="editor-content">
+          <section class="editor-view active" data-view-panel="graph">
+            <div class="graph-layout">
+              <div class="canvas-wrap">
+                <div class="canvas-header">
+                  <div>
+                    <div class="section-label">Canvas</div>
+                    <div class="helper-copy">Drag from library, click nodes from explorer, and reposition flow.</div>
+                  </div>
+                  <span class="meta-chip" id="selectedNodeChip">No selection</span>
+                </div>
+                <div class="canvas empty" id="canvas" aria-label="Loop canvas"></div>
               </div>
-              <div id="validationStatus" class="status">Waiting for validation.</div>
+              <aside class="graph-sidebar">
+                <div class="mini-panel">
+                  <h3>Loop metadata</h3>
+                  <div class="helper-copy" id="loopMetaSummary">Starter loop ready for editing.</div>
+                </div>
+                <div class="mini-panel">
+                  <h3>Navigation hints</h3>
+                  <div class="helper-copy">Use Explorer for structure, Graph for layout, YAML for exact schema, Preview for runtime trace.</div>
+                </div>
+              </aside>
             </div>
-            <div class="trace-pane stack">
-              <div class="label">Trace Replay</div>
-              <div class="button-row">
-                <select id="targetSelect" aria-label="Execution target">
-                  {% for target in available_targets %}
-                  <option value="{{ target }}">{{ target }}</option>
-                  {% endfor %}
-                </select>
-                <input id="inputJson" aria-label="Preview inputs JSON" value='{"prompt":"hello"}'>
+          </section>
+
+          <section class="editor-view" data-view-panel="yaml">
+            <textarea id="yamlEditor" aria-label="Loop YAML">{{ starter_yaml }}</textarea>
+          </section>
+
+          <section class="editor-view" data-view-panel="preview">
+            <div class="preview-layout">
+              <aside class="preview-sidebar">
+                <div class="preview-header">
+                  <div>
+                    <div class="section-label">Inputs</div>
+                    <div class="helper-copy">Provide JSON inputs for execution preview.</div>
+                  </div>
+                </div>
+                <div class="input-stack" style="margin-top: 14px;">
+                  <label class="label" for="inputJson">Preview Inputs JSON</label>
+                  <textarea id="inputJson" aria-label="Preview inputs JSON">{"prompt":"hello"}</textarea>
+                </div>
+              </aside>
+              <div class="preview-panel">
+                <div class="preview-header">
+                  <div>
+                    <div class="section-label">Trace Replay</div>
+                    <div class="helper-copy">Preview state execution and replay path order.</div>
+                  </div>
+                  <span class="status-pill" id="previewTargetPill">langchain</span>
+                </div>
+                <div class="trace-list" id="traceList"></div>
               </div>
-              <div id="traceList" class="stack"></div>
             </div>
-          </div>
+          </section>
         </div>
 
-        <div class="footer-note">
-          Hosted visual flow now covers drag/drop, live validation, live preview, trace replay, shared session sync, live presence, comments, and activity feed.
-        </div>
+        <footer class="status-bar">
+          <div class="status-row">
+            <div><strong>Status:</strong> <span id="statusBarMessage">Workspace ready.</span></div>
+            <div class="status-copy">
+              <span>Theme <code id="statusTheme">midnight</code></span>
+              <span> · View <code id="statusView">graph</code></span>
+              <span> · Session <code id="statusSession">{{ default_session_id }}</code></span>
+            </div>
+          </div>
+        </footer>
       </section>
 
-      <aside class="panel inspector" aria-label="Node inspector">
-        <h2>Inspector</h2>
-        <p>Select node to edit labels, handler, loop reference, inputs, transitions, guards, and parallel branches.</p>
-        <div class="stack" id="inspectorFields">
-          <div class="status">No node selected yet.</div>
-        </div>
-        <div class="stack" style="margin-top:20px;">
-          <div class="label">Room Activity</div>
-          <div id="activityList" class="activity-list">
-            <div class="status">Waiting for collaboration events.</div>
+      <aside class="utility-dock" aria-label="Inspector and collaboration">
+        <section class="dock-panel">
+          <div class="title-row">
+            <div>
+              <div class="section-label">Inspector</div>
+              <h3 class="dock-title">Node details</h3>
+            </div>
+            <span class="meta-chip" id="inspectorNodeType">state</span>
           </div>
-        </div>
+          <div id="validationStatus" class="status-card">Workspace ready.</div>
+          <div class="inspector-form" id="inspectorFields">
+            <div class="status-card">No node selected yet.</div>
+          </div>
+        </section>
+
+        <section class="dock-panel">
+          <div class="title-row">
+            <div>
+              <div class="section-label">Collaboration</div>
+              <h3 class="dock-title">Presence and activity</h3>
+            </div>
+            <span class="meta-chip" id="presenceCountChip">0 active</span>
+          </div>
+          <div class="collab-form">
+            <label class="label" for="collaboratorName">Display Name</label>
+            <input id="collaboratorName" aria-label="Collaborator name" placeholder="Your name">
+            <label class="label" for="commentInput">Comment</label>
+            <textarea id="commentInput" aria-label="Comment message" placeholder="Leave implementation notes, review comments, or handoff context"></textarea>
+            <button class="send-button" type="button" id="sendComment">
+              <svg class="icon" viewBox="0 0 24 24"><path d="M22 2 11 13"></path><path d="M22 2 15 22l-4-9-9-4z"></path></svg>
+              Send comment
+            </button>
+          </div>
+          <div>
+            <div class="section-label">Presence</div>
+            <div class="presence-list" id="presenceList">
+              <div class="status-card">No collaborators active yet.</div>
+            </div>
+          </div>
+          <div>
+            <div class="section-label">Activity feed</div>
+            <div class="activity-list" id="activityList">
+              <div class="status-card">Waiting for collaboration events.</div>
+            </div>
+          </div>
+        </section>
       </aside>
     </main>
 
     <script>
+      const body = document.body;
       const canvas = document.getElementById("canvas");
       const yamlEditor = document.getElementById("yamlEditor");
       const validationStatus = document.getElementById("validationStatus");
@@ -391,6 +1159,22 @@
       const presenceList = document.getElementById("presenceList");
       const activityList = document.getElementById("activityList");
       const commentInput = document.getElementById("commentInput");
+      const treeList = document.getElementById("treeList");
+      const loopSummary = document.getElementById("loopSummary");
+      const loopVersionChip = document.getElementById("loopVersionChip");
+      const selectedNodeChip = document.getElementById("selectedNodeChip");
+      const inspectorNodeType = document.getElementById("inspectorNodeType");
+      const previewTargetPill = document.getElementById("previewTargetPill");
+      const presenceCountChip = document.getElementById("presenceCountChip");
+      const statusBarMessage = document.getElementById("statusBarMessage");
+      const statusTheme = document.getElementById("statusTheme");
+      const statusView = document.getElementById("statusView");
+      const statusSession = document.getElementById("statusSession");
+      const breadcrumbSession = document.getElementById("breadcrumbSession");
+      const sessionLabel = document.getElementById("sessionLabel");
+      const loopMetaSummary = document.getElementById("loopMetaSummary");
+      const themeSelect = document.getElementById("themeSelect");
+      const autoSyncToggle = document.getElementById("autoSyncToggle");
       const sessionId = new URLSearchParams(window.location.search).get("session") || "{{ default_session_id }}";
       const actorId = window.localStorage.getItem("cairnStudioActorId") || randomActorId();
 
@@ -411,6 +1195,15 @@
       let sessionVersion = 0;
       let remoteSyncTimer = null;
       let collaborationTimer = null;
+      let activeSidebar = "explorer";
+      let activeView = "graph";
+      let followRemoteSession = true;
+
+      function randomActorId() {
+        const value = `actor-${Math.random().toString(36).slice(2, 10)}`;
+        window.localStorage.setItem("cairnStudioActorId", value);
+        return value;
+      }
 
       async function postJson(url, payload) {
         const response = await fetch(url, {
@@ -423,20 +1216,59 @@
         return data;
       }
 
-      function setStatus(text, kind = "") {
-        validationStatus.textContent = text;
-        validationStatus.className = kind ? `status ${kind}` : "status";
-      }
-
-      async function fetchSession() {
-        return fetchJson(`/api/session?id=${encodeURIComponent(sessionId)}`, "Session load failed");
-      }
-
       async function fetchJson(url, fallbackMessage) {
         const response = await fetch(url);
         const data = await response.json();
         if (!response.ok) throw new Error(data.error || fallbackMessage);
         return data;
+      }
+
+      function setStatus(text, kind = "") {
+        validationStatus.textContent = text;
+        validationStatus.className = kind ? `status-card ${kind}` : "status-card";
+        statusBarMessage.textContent = text;
+      }
+
+      function applyTheme(theme) {
+        body.dataset.theme = theme;
+        themeSelect.value = theme;
+        statusTheme.textContent = theme;
+        window.localStorage.setItem("cairnStudioTheme", theme);
+      }
+
+      function setSidebarPanel(panel) {
+        activeSidebar = panel;
+        document.querySelectorAll(".activity-button[data-sidebar]").forEach((button) => {
+          button.classList.toggle("active", button.dataset.sidebar === panel);
+        });
+        document.querySelectorAll(".sidebar-panel").forEach((panelNode) => {
+          panelNode.classList.toggle("active", panelNode.dataset.panel === panel);
+        });
+      }
+
+      function setEditorView(view) {
+        activeView = view;
+        document.querySelectorAll(".tab-button").forEach((button) => {
+          button.classList.toggle("active", button.dataset.view === view);
+        });
+        document.querySelectorAll(".editor-view").forEach((panel) => {
+          panel.classList.toggle("active", panel.dataset.viewPanel === view);
+        });
+        statusView.textContent = view;
+      }
+
+      function updateWorkspaceMeta() {
+        const loopData = loopModel.loop || {};
+        loopSummary.textContent = loopData.description || `${loopData.states?.length || 0} states configured`;
+        loopVersionChip.textContent = loopData.version || "0.1.0";
+        loopMetaSummary.textContent = `${loopData.name || "Visual Loop"} · ${loopData.states?.length || 0} states · ${loopData.imports?.length || 0} imports`;
+        statusSession.textContent = sessionId;
+        breadcrumbSession.textContent = sessionId;
+        sessionLabel.textContent = sessionId;
+      }
+
+      async function fetchSession() {
+        return fetchJson(`/api/session?id=${encodeURIComponent(sessionId)}`, "Session load failed");
       }
 
       async function syncSessionSave() {
@@ -456,15 +1288,17 @@
       }
 
       async function pollSession() {
+        if (!followRemoteSession) return;
         try {
           const remote = await fetchSession();
           if ((remote.version || 0) > sessionVersion) {
             sessionVersion = remote.version || 0;
             yamlEditor.value = remote.yaml || yamlEditor.value;
             Object.assign(loopModel, remote.model || loopModel);
-            selectedNodeId = loopModel.loop.states[0]?.id || selectedNodeId;
-            renderCanvas();
-            renderInspector();
+            selectedNodeId = selectedNodeId && loopModel.loop.states.some((node) => node.id === selectedNodeId)
+              ? selectedNodeId
+              : loopModel.loop.states[0]?.id || null;
+            renderAll();
             setStatus(`Synced shared session "${sessionId}"`, "ok");
           }
         } catch (error) {
@@ -476,16 +1310,10 @@
         return `${prefix}-${Math.random().toString(36).slice(2, 8)}`;
       }
 
-      function randomActorId() {
-        const value = `actor-${Math.random().toString(36).slice(2, 10)}`;
-        window.localStorage.setItem("cairnStudioActorId", value);
-        return value;
-      }
-
       function addNode(kind, handler, x, y) {
         const node = {
           id: randomId(kind === "subloop" ? "subloop" : "state"),
-          label: kind === "subloop" ? "Sub-loop" : handler.replace("core.", "").replace(".", " "),
+          label: kind === "subloop" ? "Sub-loop" : formatHandlerLabel(handler),
           kind,
           handler: kind === "subloop" ? "" : handler,
           loop: kind === "subloop" ? "import-name" : "",
@@ -500,8 +1328,15 @@
         loopModel.loop.states.push(node);
         selectedNodeId = node.id;
         syncYamlFromModel();
-        renderCanvas();
-        renderInspector();
+        renderAll();
+      }
+
+      function formatHandlerLabel(handler) {
+        return (handler || "state")
+          .replace("core.", "")
+          .split(".")
+          .map((chunk) => chunk.charAt(0).toUpperCase() + chunk.slice(1))
+          .join(" ");
       }
 
       function renderCanvas() {
@@ -515,33 +1350,58 @@
           element.draggable = true;
           element.innerHTML = `
             <header>
-              <div class="node-title">${node.label}</div>
-              <span class="chip">${node.kind === "subloop" ? "sub-loop" : (node.handler || "handler")}</span>
+              <div class="node-title">${escapeHtml(node.label)}</div>
+              <span class="node-kind">${escapeHtml(node.kind === "subloop" ? "sub-loop" : (node.handler || "handler"))}</span>
             </header>
-            <div class="footer-note">${node.condition || "No condition"}</div>
-            <div class="mini-list">
-              ${node.transitions.map((target) => `<span class="chip">${target}</span>`).join("") || '<span class="chip">no transitions</span>'}
+            <div class="node-meta">${escapeHtml(node.condition || "No condition")}</div>
+            <div class="transition-list">
+              ${node.transitions.map((target) => `<span class="transition-pill">${escapeHtml(target)}</span>`).join("") || '<span class="transition-pill">no transitions</span>'}
             </div>
           `;
           element.addEventListener("click", () => {
             selectedNodeId = node.id;
-            renderCanvas();
-            renderInspector();
+            renderAll();
           });
           element.addEventListener("dragstart", (event) => {
             event.dataTransfer.setData("application/json", JSON.stringify({ type: "move-node", id: node.id }));
           });
           canvas.appendChild(element);
         }
+        selectedNodeChip.textContent = selectedNodeId || "No selection";
+      }
+
+      function renderExplorer() {
+        updateWorkspaceMeta();
+        if (!loopModel.loop.states.length) {
+          treeList.innerHTML = '<div class="status-card">No states loaded yet.</div>';
+          return;
+        }
+        treeList.innerHTML = loopModel.loop.states.map((node) => `
+          <button class="tree-item${node.id === selectedNodeId ? " active" : ""}" type="button" data-tree-id="${escapeHtml(node.id)}">
+            <div class="tree-row">
+              <strong>${escapeHtml(node.label)}</strong>
+              <span class="meta-chip">${escapeHtml(node.kind === "subloop" ? "sub-loop" : "state")}</span>
+            </div>
+            <div class="tree-meta">${escapeHtml(node.kind === "subloop" ? (node.loop || "import missing") : (node.handler || "handler missing"))}</div>
+          </button>
+        `).join("");
+        treeList.querySelectorAll("[data-tree-id]").forEach((button) => {
+          button.addEventListener("click", () => {
+            selectedNodeId = button.dataset.treeId;
+            renderAll();
+          });
+        });
       }
 
       function renderInspector() {
         const node = loopModel.loop.states.find((item) => item.id === selectedNodeId);
         if (!node) {
-          inspectorFields.innerHTML = '<div class="status">No node selected yet.</div>';
+          inspectorFields.innerHTML = '<div class="status-card">No node selected yet.</div>';
+          inspectorNodeType.textContent = "state";
           return;
         }
 
+        inspectorNodeType.textContent = node.kind === "subloop" ? "sub-loop" : "state";
         inspectorFields.innerHTML = `
           <label class="label" for="nodeLabel">Label</label>
           <input id="nodeLabel" value="${escapeHtml(node.label)}">
@@ -566,7 +1426,7 @@
           field.addEventListener("input", () => {
             updater(field.value);
             syncYamlFromModel();
-            renderCanvas();
+            renderAll();
           });
         };
 
@@ -584,7 +1444,7 @@
           }
         });
         bind("nodeInputs", (value) => {
-          try { node.inputs = JSON.parse(value || "{}"); } catch (error) {}
+          try { node.inputs = JSON.parse(value || "{}"); } catch (_error) {}
         });
       }
 
@@ -597,8 +1457,7 @@
           const data = await postJson("/api/model/from-yaml", { yaml: yamlEditor.value });
           Object.assign(loopModel, data);
           selectedNodeId = loopModel.loop.states[0]?.id || null;
-          renderCanvas();
-          renderInspector();
+          renderAll();
           await syncSessionSave();
           setStatus("Canvas synced from YAML.", "ok");
         } catch (error) {
@@ -630,10 +1489,11 @@
         let inputs = {};
         try {
           inputs = JSON.parse(inputJson.value || "{}");
-        } catch (error) {
+        } catch (_error) {
           setStatus("Preview inputs must be valid JSON.", "error");
           return;
         }
+
         try {
           const data = await postJson("/api/preview", {
             yaml: yamlEditor.value,
@@ -641,6 +1501,8 @@
             target: targetSelect.value
           });
           renderTrace(data.state_results || []);
+          previewTargetPill.textContent = targetSelect.value;
+          setEditorView("preview");
           setStatus(data.success ? "Preview run completed." : (data.error || "Preview failed"), data.success ? "ok" : "error");
         } catch (error) {
           setStatus(error.message, "error");
@@ -648,13 +1510,17 @@
       }
 
       function renderTrace(states) {
+        if (!states.length) {
+          traceList.innerHTML = '<div class="status-card">No trace yet. Run preview to inspect execution path.</div>';
+          return;
+        }
         traceList.innerHTML = states.map((state, index) => `
-          <div class="trace-step" data-trace-index="${index}">
-            <strong>${state.state_id}</strong>
-            <div class="footer-note">${state.skipped ? "skipped" : "executed"}</div>
+          <div class="trace-card" data-trace-index="${index}">
+            <strong>${escapeHtml(state.state_id)}</strong>
+            <div class="trace-meta">${state.skipped ? "skipped" : "executed"}</div>
           </div>
         `).join("");
-        const steps = [...traceList.querySelectorAll(".trace-step")];
+        const steps = [...traceList.querySelectorAll(".trace-card")];
         if (replayTimer) window.clearInterval(replayTimer);
         let index = 0;
         replayTimer = window.setInterval(() => {
@@ -665,14 +1531,15 @@
       }
 
       function renderPresence(items) {
+        presenceCountChip.textContent = `${items.length} active`;
         if (!items.length) {
-          presenceList.innerHTML = '<div class="status">No collaborators active yet.</div>';
+          presenceList.innerHTML = '<div class="status-card">No collaborators active yet.</div>';
           return;
         }
         presenceList.innerHTML = items.map((item) => `
-          <div class="collab-card">
+          <div class="presence-card">
             <strong>${escapeHtml(item.actor_name)}</strong>
-            <p class="footer-note">Active now · ${escapeHtml(item.actor_id)}</p>
+            <div class="collab-copy">${escapeHtml(item.actor_id)}</div>
           </div>
         `).join("");
       }
@@ -683,15 +1550,15 @@
           ...comments.map((item) => ({ ...item, kindLabel: "comment" }))
         ]
           .sort((left, right) => String(right.at).localeCompare(String(left.at)))
-          .slice(0, 12);
+          .slice(0, 14);
         if (!merged.length) {
-          activityList.innerHTML = '<div class="status">Waiting for collaboration events.</div>';
+          activityList.innerHTML = '<div class="status-card">Waiting for collaboration events.</div>';
           return;
         }
         activityList.innerHTML = merged.map((item) => `
           <div class="activity-card">
             <strong>${escapeHtml(item.actor_name || "unknown")}</strong>
-            <p class="footer-note">${escapeHtml(item.kindLabel)} · ${escapeHtml(item.message || "")}</p>
+            <div class="collab-copy">${escapeHtml(item.kindLabel)} · ${escapeHtml(item.message || "")}</div>
           </div>
         `).join("");
       }
@@ -731,6 +1598,13 @@
         }
       }
 
+      function renderAll() {
+        renderExplorer();
+        renderCanvas();
+        renderInspector();
+        updateWorkspaceMeta();
+      }
+
       function downloadYaml() {
         const blob = new Blob([yamlEditor.value], { type: "text/yaml" });
         const url = URL.createObjectURL(blob);
@@ -741,6 +1615,16 @@
         URL.revokeObjectURL(url);
       }
 
+      async function copyShareLink() {
+        try {
+          await navigator.clipboard.writeText(shareSessionInput.value);
+          setStatus("Share link copied.", "ok");
+        } catch (_error) {
+          shareSessionInput.select();
+          setStatus("Select share link and copy manually.", "ok");
+        }
+      }
+
       function escapeHtml(value) {
         return String(value)
           .replaceAll("&", "&amp;")
@@ -748,6 +1632,14 @@
           .replaceAll(">", "&gt;")
           .replaceAll('"', "&quot;");
       }
+
+      document.querySelectorAll(".activity-button[data-sidebar]").forEach((button) => {
+        button.addEventListener("click", () => setSidebarPanel(button.dataset.sidebar));
+      });
+
+      document.querySelectorAll(".tab-button").forEach((button) => {
+        button.addEventListener("click", () => setEditorView(button.dataset.view));
+      });
 
       document.querySelectorAll(".palette-card").forEach((button) => {
         button.addEventListener("dragstart", (event) => {
@@ -765,8 +1657,8 @@
         event.preventDefault();
         const payload = JSON.parse(event.dataTransfer.getData("application/json"));
         const rect = canvas.getBoundingClientRect();
-        const x = event.clientX - rect.left - 100;
-        const y = event.clientY - rect.top - 40;
+        const x = event.clientX - rect.left - 108;
+        const y = event.clientY - rect.top - 42;
         if (payload.type === "create-node") {
           addNode(payload.kind, payload.handler, x, y);
           return;
@@ -777,19 +1669,37 @@
           node.x = x;
           node.y = y;
           renderCanvas();
+          syncYamlFromModel();
         }
       });
 
       document.getElementById("validateYaml").addEventListener("click", validateCurrentYaml);
       document.getElementById("previewLoop").addEventListener("click", previewLoop);
-      document.getElementById("syncFromYaml").addEventListener("click", syncModelFromYaml);
+      document.getElementById("syncFromYaml").addEventListener("click", () => {
+        setEditorView("graph");
+        syncModelFromYaml();
+      });
       document.getElementById("downloadYaml").addEventListener("click", downloadYaml);
       document.getElementById("sendComment").addEventListener("click", sendComment);
+      document.getElementById("shareSessionButton").addEventListener("click", copyShareLink);
       document.getElementById("uploadYaml").addEventListener("change", async (event) => {
         const file = event.target.files?.[0];
         if (!file) return;
         yamlEditor.value = await file.text();
+        setEditorView("yaml");
         syncModelFromYaml();
+      });
+
+      themeSelect.addEventListener("change", () => applyTheme(themeSelect.value));
+      autoSyncToggle.addEventListener("change", () => {
+        followRemoteSession = autoSyncToggle.value === "on";
+        setStatus(followRemoteSession ? "Remote session sync enabled." : "Remote session sync paused.", "ok");
+      });
+      targetSelect.addEventListener("change", () => {
+        previewTargetPill.textContent = targetSelect.value;
+      });
+      collaboratorNameInput.addEventListener("input", () => {
+        window.localStorage.setItem("cairnStudioActorName", collaboratorNameInput.value);
       });
 
       let validateTimer = null;
@@ -798,26 +1708,30 @@
         validateTimer = window.setTimeout(async () => {
           await validateCurrentYaml();
           await syncSessionSave();
-        }, 300);
+        }, 320);
       });
 
       async function bootstrap() {
+        const persistedTheme = window.localStorage.getItem("cairnStudioTheme") || "midnight";
         collaboratorNameInput.value = window.localStorage.getItem("cairnStudioActorName") || "Builder";
-        collaboratorNameInput.addEventListener("input", () => {
-          window.localStorage.setItem("cairnStudioActorName", collaboratorNameInput.value);
-        });
         shareSessionInput.value = `${window.location.origin}${window.location.pathname}?session=${encodeURIComponent(sessionId)}`;
+        applyTheme(persistedTheme);
+        previewTargetPill.textContent = targetSelect.value;
         const remote = await fetchSession();
         sessionVersion = remote.version || 0;
         yamlEditor.value = remote.yaml || yamlEditor.value;
         Object.assign(loopModel, remote.model || loopModel);
-        await syncModelFromYaml();
-        remoteSyncTimer = window.setInterval(pollSession, 1200);
+        selectedNodeId = loopModel.loop.states[0]?.id || null;
+        renderAll();
+        await validateCurrentYaml();
         await refreshCollaboration();
+        remoteSyncTimer = window.setInterval(pollSession, 1200);
         collaborationTimer = window.setInterval(refreshCollaboration, 2500);
       }
 
-      bootstrap();
+      bootstrap().catch((error) => {
+        setStatus(error.message, "error");
+      });
     </script>
   </body>
 </html>
