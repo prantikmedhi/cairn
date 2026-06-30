@@ -7,6 +7,7 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from typing import Any
 from urllib.parse import parse_qs, urlparse
+import mimetypes
 
 import yaml
 
@@ -19,6 +20,7 @@ from cairnforge.validator import CairnValidationError, validate_loop_definition
 ROOT = Path(__file__).resolve().parent
 TEMPLATE_DIR = ROOT / "templates"
 SESSION_DIR = ROOT / "sessions"
+PUBLIC_DIR = ROOT / "public"
 PRESENCE_TTL_SECONDS = 15
 STARTER_LOOP = """cairn: "1.0"
 
@@ -376,6 +378,9 @@ class CairnStudioHandler(BaseHTTPRequestHandler):
         if parsed.path == "/":
             self._send_html(render_index_html())
             return
+        if parsed.path.startswith("/public/"):
+            self._serve_static_file(parsed.path)
+            return
         if parsed.path == "/api/session":
             query = parse_qs(parsed.query)
             session_id = query.get("id", ["default"])[0]
@@ -473,6 +478,32 @@ class CairnStudioHandler(BaseHTTPRequestHandler):
         self.send_header("Content-Length", str(len(data)))
         self.end_headers()
         self.wfile.write(data)
+
+    def _serve_static_file(self, path: str) -> None:
+        rel_path = path[len("/public/"):]
+        file_path = (PUBLIC_DIR / rel_path).resolve()
+        
+        if not str(file_path).startswith(str(PUBLIC_DIR)):
+            self.send_error(HTTPStatus.FORBIDDEN, "Forbidden")
+            return
+            
+        if not file_path.is_file():
+            self.send_error(HTTPStatus.NOT_FOUND, "Not Found")
+            return
+            
+        content_type, _ = mimetypes.guess_type(str(file_path))
+        if not content_type:
+            content_type = "application/octet-stream"
+            
+        try:
+            data = file_path.read_bytes()
+            self.send_response(HTTPStatus.OK)
+            self.send_header("Content-Type", content_type)
+            self.send_header("Content-Length", str(len(data)))
+            self.end_headers()
+            self.wfile.write(data)
+        except Exception:
+            self.send_error(HTTPStatus.INTERNAL_SERVER_ERROR, "Internal Server Error")
 
 
 def run_server(host: str = "127.0.0.1", port: int = 8787) -> None:
