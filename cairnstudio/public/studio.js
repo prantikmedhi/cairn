@@ -334,7 +334,7 @@
       async function validateCurrentYaml() {
         try {
           const data = await postJson("/api/validate", { yaml: yamlEditor.value });
-          setStatus(\`Valid loop: \${data.loop_id}. States: \${data.states.join(", ")}\`, "ok");
+          setStatus(`Valid loop: ${data.loop_id}. States: ${data.states.join(", ")}`, "ok");
         } catch (error) {
           setStatus(error.message, "error");
         }
@@ -369,12 +369,12 @@
           traceList.innerHTML = '<div class="status-card">No trace yet. Run preview to inspect execution path.</div>';
           return;
         }
-        traceList.innerHTML = states.map((state, index) => \`
-          <div class="trace-card" data-trace-index="\${index}">
-            <strong>\${escapeHtml(state.state_id)}</strong>
-            <div class="trace-meta">\${state.skipped ? "skipped" : "executed"}</div>
+        traceList.innerHTML = states.map((state, index) => `
+          <div class="trace-card" data-trace-index="${index}">
+            <strong>${escapeHtml(state.state_id)}</strong>
+            <div class="trace-meta">${state.skipped ? "skipped" : "executed"}</div>
           </div>
-        \`).join("");
+        `).join("");
         const steps = [...traceList.querySelectorAll(".trace-card")];
         if (replayTimer) window.clearInterval(replayTimer);
         let index = 0;
@@ -386,17 +386,17 @@
       }
 
       function renderPresence(items) {
-        presenceCountChip.textContent = \`\${items.length} active\`;
+        presenceCountChip.textContent = `${items.length} active`;
         if (!items.length) {
           presenceList.innerHTML = '<div class="status-card">No collaborators active yet.</div>';
           return;
         }
-        presenceList.innerHTML = items.map((item) => \`
+        presenceList.innerHTML = items.map((item) => `
           <div class="presence-card">
-            <strong>\${escapeHtml(item.actor_name)}</strong>
-            <div class="collab-copy">\${escapeHtml(item.actor_id)}</div>
+            <strong>${escapeHtml(item.actor_name)}</strong>
+            <div class="collab-copy">${escapeHtml(item.actor_id)}</div>
           </div>
-        \`).join("");
+        `).join("");
       }
 
       function renderActivity(activity, comments) {
@@ -410,12 +410,12 @@
           activityList.innerHTML = '<div class="status-card">Waiting for collaboration events.</div>';
           return;
         }
-        activityList.innerHTML = merged.map((item) => \`
+        activityList.innerHTML = merged.map((item) => `
           <div class="activity-card">
-            <strong>\${escapeHtml(item.actor_name || "unknown")}</strong>
-            <div class="collab-copy">\${escapeHtml(item.kindLabel)} · \${escapeHtml(item.message || "")}</div>
+            <strong>${escapeHtml(item.actor_name || "unknown")}</strong>
+            <div class="collab-copy">${escapeHtml(item.kindLabel)} · ${escapeHtml(item.message || "")}</div>
           </div>
-        \`).join("");
+        `).join("");
       }
 
       async function refreshCollaboration() {
@@ -425,7 +425,7 @@
             actor_id: actorId,
             actor_name: collaboratorNameInput.value.trim() || "Anonymous builder"
           });
-          const activity = await fetchJson(\`/api/session/activity?id=\${encodeURIComponent(sessionId)}\`, "Activity load failed");
+          const activity = await fetchJson(`/api/session/activity?id=${encodeURIComponent(sessionId)}`, "Activity load failed");
           renderPresence(presence.presence || []);
           renderActivity(activity.activity || [], activity.comments || []);
         } catch (error) {
@@ -465,7 +465,7 @@
         const url = URL.createObjectURL(blob);
         const anchor = document.createElement("a");
         anchor.href = url;
-        anchor.download = \`\${loopModel.loop.id || "cairn-loop"}.crn\`;
+        anchor.download = `${loopModel.loop.id || "cairn-loop"}.crn`;
         anchor.click();
         URL.revokeObjectURL(url);
       }
@@ -569,7 +569,7 @@
       async function bootstrap() {
         const persistedTheme = window.localStorage.getItem("cairnStudioTheme") || "midnight";
         collaboratorNameInput.value = window.localStorage.getItem("cairnStudioActorName") || "Builder";
-        shareSessionInput.value = \`\${window.location.origin}\${window.location.pathname}?session=\${encodeURIComponent(sessionId)}\`;
+        shareSessionInput.value = `${window.location.origin}${window.location.pathname}?session=${encodeURIComponent(sessionId)}`;
         applyTheme(persistedTheme);
         previewTargetPill.textContent = targetSelect.value;
         const remote = await fetchSession();

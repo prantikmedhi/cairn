@@ -1,40 +1,40 @@
 :root {
-  /* Colors */
-  --canvas: #07080a;
-  --surface: #0d0d0d;
-  --surface-elevated: #101111;
-  --surface-card: #121212;
-  --button-fg: #18191a;
-  --hairline: #242728;
-  --hairline-soft: rgba(255, 255, 255, 0.08);
-  --hairline-strong: rgba(255, 255, 255, 0.16);
-  
-  --primary: #ffffff;
-  --primary-pressed: #e8e8e8;
-  --on-primary: #000000;
-  
-  --ink: #f4f4f6;
-  --body: #cdcdcd;
-  --charcoal: #d3d3d4;
-  --mute: #9c9c9d;
-  --ash: #6a6b6c;
-  --stone: #434345;
-  --on-dark: #ffffff;
-  --on-dark-mute: rgba(255, 255, 255, 0.72);
-  
-  --accent-blue: #57c1ff;
-  --accent-blue-soft: rgba(87, 193, 255, 0.15);
-  --accent-red: #ff6161;
-  --accent-red-soft: rgba(255, 97, 97, 0.15);
-  --accent-green: #59d499;
-  --accent-green-soft: rgba(89, 212, 153, 0.15);
-  --accent-yellow: #ffc533;
-  --accent-yellow-soft: rgba(255, 197, 51, 0.15);
-  
-  --hero-stripe-start: #ff5757;
-  --hero-stripe-end: #a1131a;
-  --key-bg-start: #121212;
-  --key-bg-end: #0d0d0d;
+  /* Colors — Claude-style warm light theme */
+  --canvas: #faf9f5;
+  --surface: #ffffff;
+  --surface-elevated: #f0eee6;
+  --surface-card: #ffffff;
+  --button-fg: #ffffff;
+  --hairline: #e5e2d9;
+  --hairline-soft: rgba(31, 30, 28, 0.06);
+  --hairline-strong: rgba(31, 30, 28, 0.14);
+
+  --primary: #d97757;
+  --primary-pressed: #c2643f;
+  --on-primary: #ffffff;
+
+  --ink: #1f1e1d;
+  --body: #43413c;
+  --charcoal: #33322e;
+  --mute: #87867d;
+  --ash: #a8a599;
+  --stone: #d8d5c9;
+  --on-dark: #1f1e1d;
+  --on-dark-mute: rgba(31, 30, 28, 0.72);
+
+  --accent-blue: #6a8caf;
+  --accent-blue-soft: rgba(106, 140, 175, 0.12);
+  --accent-red: #bd5d3a;
+  --accent-red-soft: rgba(189, 93, 58, 0.12);
+  --accent-green: #7a8c5f;
+  --accent-green-soft: rgba(122, 140, 95, 0.12);
+  --accent-yellow: #c1893f;
+  --accent-yellow-soft: rgba(193, 137, 63, 0.12);
+
+  --hero-stripe-start: #d97757;
+  --hero-stripe-end: #edb08a;
+  --key-bg-start: #f0eee6;
+  --key-bg-end: #e5e2d9;
   
   /* Border Radius */
   --rounded-none: 0px;
@@ -73,8 +73,9 @@ body {
 
 /* Typography Hierarchy */
 .display-xl {
+  font-family: 'Source Serif 4', Georgia, serif;
   font-size: 64px;
-  font-weight: 600;
+  font-weight: 500;
   line-height: 1.1;
   letter-spacing: 0;
   color: var(--ink);
@@ -82,6 +83,7 @@ body {
 }
 
 .display-lg {
+  font-family: 'Source Serif 4', Georgia, serif;
   font-size: 56px;
   font-weight: 500;
   line-height: 1.17;
